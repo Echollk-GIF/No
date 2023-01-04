@@ -195,3 +195,42 @@ const styles = StyleSheet.create({
 StatusBar常用属性：hidden、backgroundColor、barStyle
 
 Switch常用属性：trackColor背景色、thumbColor小圆点颜色、value、onValueChange
+
+## ActivityIndicator && Platform
+
+```react
+import { StyleSheet, View, ActivityIndicator, Platform } from 'react-native'
+import React from 'react'
+
+export default function App () {
+  if (Platform.OS === 'android') {
+    alert('安卓')
+  } else if (Platform.OS === 'ios') {
+    alert('IOS')
+  }
+  return (
+    <View style={styles.container}>
+      <ActivityIndicator
+        color={'red'}
+        size={'large'} />
+      {/* 数字指定大小只在安卓端有效 */}
+      <ActivityIndicator
+        color={'red'}
+        size={70} />
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center'
+  }
+})
+```
+
+总结：
+
+ActivityIndicator常用属性：color、size
+
+Platform不是组件，可以用来判断当前系统
