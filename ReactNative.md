@@ -1,3 +1,5 @@
+[TOC]
+
 创建项目 react-native init myproject
 
 插件快捷命令:rnf(react native function)、rnfs(带StyleSheet)
@@ -60,3 +62,97 @@ const styles = StyleSheet.create({
 })
 ```
 
+# 核心组件
+
+Button&&Alert
+
+```react
+import { View, StyleSheet, Button, Alert } from 'react-native'
+export default function App () {
+  const handlePressTwo = () => {
+    Alert.alert(
+      "警告标题",
+      "警告内容",
+      [
+        {
+          text: "取消",
+          onPress: () => {
+            console.log('Cancel')
+          },
+          style: 'cancel'
+        },
+        {
+          text: "确定",
+          onPress: () => {
+            console.log('OK')
+          },
+          style: "default"
+        }
+      ]
+    )
+  }
+  const handlePressThree = () => {
+    Alert.alert(
+      "更新提示",
+      "发现新版本，是否现在更新",
+      [
+        {
+          text: "稍后再试",
+          onPress: () => {
+            console.log('稍后提醒我')
+          },
+        },
+        {
+          text: "取消",
+          onPress: () => {
+            console.log('Cancel')
+          },
+          style: 'cancel'
+        },
+        {
+          text: "确定",
+          onPress: () => {
+            console.log('OK')
+          },
+          style: "default"
+        },
+      ]
+    )
+  }
+  return (
+    <View style={styles.container}>
+      <Button
+        title='第一个按钮'
+        color={'red'}
+        onPress={() => {
+          Alert.alert('我是第一个按钮')
+        }}
+      ></Button>
+      <Button
+        title='第两个按钮'
+        color={'red'}
+        onPress={handlePressTwo}
+      ></Button>
+      <Button
+        title='第三个按钮'
+        color={'red'}
+        onPress={handlePressThree}
+      ></Button>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'space-around',
+    alignItems: 'center'
+  }
+})
+```
+
+总结：
+
+Button常用属性：title、onPress、color（注意不要以style定义button的颜色）
+
+Alert常用属性：Alert.alert() 可以再里面依次写警告标题、内容、以及N个按钮
