@@ -1,8 +1,12 @@
 创建项目 react-native init myproject
 
-插件快捷命令:rnf(react native function)
+插件快捷命令:rnf(react native function)、rnfs(带StyleSheet)
+
+# CSS
 
 RN中的样式与CSS的不同：没有继承性（RN中的继承只发生在Text组件上）、样式名采用小驼峰命名、所有尺寸都没有单位、有些特殊的样式名(marginHorizontal水平外边距、marginVertical垂直外边距)
+
+## StyleSheet
 
 可以通过在style属性中调用StyleSheet声明样式(个人觉得有点像scss)
 
@@ -24,6 +28,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+})
+```
+
+## Dimensions
+
+Dimensions可以用来获取屏幕的尺寸
+
+```react
+import { StatusBar } from 'expo-status-bar'
+import { StyleSheet, Text, View, Dimensions } from 'react-native'
+export default function App () {
+  const windowWidth = Dimensions.get('window').width
+  const windowHeight = Dimensions.get('window').height
+  return (
+    <View style={styles.container}>
+      <Text>{windowWidth}</Text>
+      <Text>{windowHeight}</Text>
+      <StatusBar />
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 })
 ```
 
