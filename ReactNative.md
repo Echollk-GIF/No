@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
 
 # 核心组件
 
-Button&&Alert
+## Button && Alert
 
 ```react
 import { View, StyleSheet, Button, Alert } from 'react-native'
@@ -156,3 +156,42 @@ const styles = StyleSheet.create({
 Button常用属性：title、onPress、color（注意不要以style定义button的颜色）
 
 Alert常用属性：Alert.alert() 可以再里面依次写警告标题、内容、以及N个按钮
+
+## StatusBar && Switch
+
+```react
+import { StyleSheet, View, StatusBar, Switch } from 'react-native'
+import React, { useState } from 'react'
+
+export default function App () {
+  const [hideStatus, setHideStatus] = useState()
+  return (
+    <View style={[styles.container]}>
+      <StatusBar
+        hidden={hideStatus}
+        barStyle={'dark-content'} />
+      <Switch
+        trackColor={{ false: 'red', true: 'green' }}
+        thumbColor={'blue'}
+        value={hideStatus}
+        onValueChange={() => {
+          setHideStatus(!hideStatus)
+        }} />
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
+})
+```
+
+总结：
+
+StatusBar常用属性：hidden、backgroundColor、barStyle
+
+Switch常用属性：trackColor背景色、thumbColor小圆点颜色、value、onValueChange
