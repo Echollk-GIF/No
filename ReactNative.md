@@ -271,3 +271,82 @@ const styles = StyleSheet.create({
 总结：
 
 Image常用属性：style、source(本地图片用require，线上图片用{uri:xxxx})
+
+## TextInput
+
+```react
+import { StyleSheet, View, TextInput, Dimensions, Button } from 'react-native'
+import React, { useState } from 'react'
+
+export default function App () {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState()
+  const [phone, setPhone] = useState('')
+  const [text, setText] = useState()
+  const doLogin = () => {
+    alert(username + password + text)
+  }
+  return (
+    <View style={styles.container}>
+      <TextInput
+        style={styles.input}
+        placeholder="请输入用户名"
+        value={username}
+        onChangeText={(val) => {
+          setUsername(val)
+        }} />
+      <TextInput
+        style={styles.input}
+        placeholder="请输入密码"
+        value={password}
+        secureTextEntry={true}
+        onChangeText={(val) => {
+          setPassword(val)
+        }} />
+      <TextInput
+        style={styles.input}
+        placeholder="请输入手机号"
+        keyboardType='number-pad'
+        value={phone}
+        onChangeText={(val) => {
+          setPhone(val)
+        }} />
+      <TextInput
+        style={styles.input}
+        placeholder="请输入自我介绍"
+        multiline={true}
+        numberOfLines={5}
+        textAlignVertical="top"
+        value={text}
+        onChangeText={(val) => {
+          setText(val)
+        }} />
+      <View>
+        <Button
+          title='登录'
+          onPress={doLogin}></Button>
+      </View>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  input: {
+    width: Dimensions.get('window').width - 20,
+    height: 40,
+    margin: 10,
+    borderWidth: 1,
+    borderColor: 'red',
+    paddingHorizontal: 5
+  }
+})
+```
+
+总结：
+
+TextInput常用属性要根据输入框类型，具体可以看示例
