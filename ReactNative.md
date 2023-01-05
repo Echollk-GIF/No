@@ -408,3 +408,66 @@ const styles = StyleSheet.create({
 })
 ```
 
+## ScrollView && SafeAreaView
+
+SafeAreaView相比普通的View会避免刘海屏问题
+
+ScrollView在安卓下会有一个显示不全的问题，可以在ScrollView内部的最下方加一个View，根据Platform来给iOS0高度，安卓根据丢失文本高度给高度
+
+```react
+import {
+  StyleSheet, View, Text,
+  ScrollView
+} from 'react-native'
+import React from 'react'
+
+export default function App () {
+  return (
+    <View>
+      <Text>111</Text>
+      <Text>111</Text>
+      <Text>111</Text>
+      <ScrollView
+        horizontal={true}>
+        <Text style={styles.nav}>新闻</Text>
+        <Text style={styles.nav}>新闻</Text>
+        <Text style={styles.nav}>新闻</Text>
+        <Text style={styles.nav}>新闻</Text>
+        <Text style={styles.nav}>新闻</Text>
+        <Text style={styles.nav}>新闻</Text>
+        <Text style={styles.nav}>新闻</Text>
+        <Text style={styles.nav}>新闻</Text>
+        <Text style={styles.nav}>新闻</Text>
+        <Text style={styles.nav}>新闻</Text>
+        <Text style={styles.nav}>新闻</Text>
+        <Text style={styles.nav}>新闻</Text>
+      </ScrollView>
+      <ScrollView
+        contentContainerStyle={{ margin: 30 }}
+        showsVerticalScrollIndicator={false}>
+        <Text style={styles.text}>
+          aaaaaa
+          aaaaaa
+          aaaaaa
+          aaaaaa
+          aaaaaa
+          aaaaaa
+          aaaaaa
+        </Text>
+      </ScrollView>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  text: {
+    fontSize: 130
+  },
+  nav: {
+    margin: 10,
+    height: 50,
+    fontSize: 20
+  }
+})
+```
+
