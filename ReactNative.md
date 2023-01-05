@@ -831,3 +831,206 @@ const styles = StyleSheet.create({
 export default App
 ```
 
+# 第三方组件
+
+## react-native-webview
+
+yarn add react-native-webview
+
+可以将网页嵌入到当前页面
+
+```react
+import React, { Component } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { WebView } from 'react-native-webview';
+
+// ...
+class MyWebComponent extends Component {
+  render() {
+    return <WebView source={{ uri: 'https://reactnative.dev/' }} />;
+  }
+}
+```
+
+## Picker(下拉框)
+
+yarn add @react-native-picker/picker
+
+```react
+const pickerRef = useRef();
+
+function open() {
+  pickerRef.current.focus();
+}
+
+function close() {
+  pickerRef.current.blur();
+}
+
+return <Picker
+  ref={pickerRef}
+  selectedValue={selectedLanguage}
+  onValueChange={(itemValue, itemIndex) =>
+    setSelectedLanguage(itemValue)
+  }>
+  <Picker.Item label="Java" value="java" />
+  <Picker.Item label="JavaScript" value="js" />
+</Picker>
+```
+
+## react-native-swiper
+
+```react
+import React, { Component } from 'react'
+import { AppRegistry, StyleSheet, Text, View } from 'react-native'
+
+import Swiper from 'react-native-swiper'
+
+const styles = StyleSheet.create({
+  wrapper: {},
+  slide1: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#9DD6EB'
+  },
+  slide2: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#97CAE5'
+  },
+  slide3: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#92BBD9'
+  },
+  text: {
+    color: '#fff',
+    fontSize: 30,
+    fontWeight: 'bold'
+  }
+})
+
+export default class SwiperComponent extends Component {
+  render() {
+    return (
+      <Swiper style={styles.wrapper} showsButtons={true}>
+        <View style={styles.slide1}>
+          <Text style={styles.text}>Hello Swiper</Text>
+        </View>
+        <View style={styles.slide2}>
+          <Text style={styles.text}>Beautiful</Text>
+        </View>
+        <View style={styles.slide3}>
+          <Text style={styles.text}>And simple</Text>
+        </View>
+      </Swiper>
+    )
+  }
+}
+
+AppRegistry.registerComponent('myproject', () => SwiperComponent)
+```
+
+## AsyncStorage
+
+yarn add @react-native-async-storage/async-storage
+
+```react
+import {AsyncStorage} from 'react-native';
+
+//Persisting data:
+_storeData = async () => {
+  try {
+    await AsyncStorage.setItem(
+      '@MySuperStore:key',
+      'I like to save it.',
+    );
+  } catch (error) {
+    // Error saving data
+  }
+};
+
+//Fetching data:
+_retrieveData = async () => {
+  try {
+    const value = await AsyncStorage.getItem('TASKS');
+    if (value !== null) {
+      // We have data!!
+      console.log(value);
+    }
+  } catch (error) {
+    // Error retrieving data
+  }
+};
+```
+
+封装storage.js
+
+```react
+import AsyncStorage from 'react-native-async-storage/async-storage'
+
+class Storage{
+  static set (key,value){
+    return AsyncStorage.setItem(key,JSON.stringify(value))
+  }
+  
+  static get(key){
+    return AsyncStorage.getItem(key).then(value=>{
+      if(value && value !== ''){
+        const jsonValue = JSON.parse(value)
+        return jsonValue
+      }
+    }).catch(()=>null)
+  }
+  
+  static update(key,newValue){
+    return AsyncStorage.getItem(key).then(oldValue=>{
+      newValue = typeof newValue === 'string' ? newValue : Object.assign({},oldValue,newValue)
+      return AsyncStorage.setItem(key,JSON.stringify(newValue))
+    })
+  }
+  
+  static delete(key){
+    return AsyncStorage.removeItem(key)
+  }
+  
+  static clear(){
+    return AsyncStorage.clear()
+  }
+}
+
+export default Storage
+```
+
+## Geolocation(定位)
+
+yarn add @react-native-community/geolocation
+
+```react
+import Geolocation from '@react-native-community/geolocation';
+import AsyncStorage from 'react-native-async-storage/async-storage'
+
+useEffect(()=>{
+  const location = storage.get('coords')
+  
+  //如果本地存储中没有位置信息则获取地理位置
+  if(location === undefined || location === ''){
+    Geolocation.getCurrentPosition(
+  info => {
+    console.log(info)
+    //获取地理位置成功后保存下来
+    AsyncStorage.setItem('coords',JSON.stringify(info.coords))
+  },
+  error => Alert.alert('报错',JSON.stringify(error)),
+  {
+    timeout:20000
+  }
+);
+  }
+},[])
+
+```
+
