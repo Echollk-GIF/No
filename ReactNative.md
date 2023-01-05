@@ -1034,3 +1034,40 @@ useEffect(()=>{
 
 ```
 
+# 路由
+
+React Native 项目中安装所需的包：
+
+yarn add @react-navigation/native
+
+npx expo install react-native-screens react-native-safe-area-context
+
+## Stack
+
+yarn add @react-navigation/native-stack
+
+## Bottom Tabs
+
+yarn add @react-navigation/material-bottom-tabs react-native-paper react-native-vector-icons
+
+## react-native-vector-icons
+
+图标组件库
+
+## DrawerNavigator
+
+抽屉导航
+
+## MaterialTopTab导航
+
+既支持点击也支持滑动切换导航
+
+## 路由传参
+
+传递参数：
+
+navigation.navigate('路由名称',{key:123})
+
+接收参数：
+
+解构出route，通过const  {key} =  route.params
