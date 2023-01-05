@@ -724,3 +724,110 @@ const styles = StyleSheet.create({
 export default App
 ```
 
+## Animated
+
+1.RN中可以直接使用的动画组件：
+
+Animated.View
+
+Animated.Text
+
+Animated.ScrollView
+
+Animated.Image
+
+2.创建动画的步骤：
+
+创建初始值 
+
+- Animated.Value()单个值
+- Animated.ValueXY()向量值
+
+将初始值绑定到动画组件上
+
+- 一般将其绑定到某个样式属性下，比如opacity、translate
+
+通过动画类型API，一帧一帧地更改初始值
+
+- Animated.decay()加速效果
+- Animated.spring()弹跳效果
+- Animated.timing()时间渐变效果
+
+```react
+import React, { useRef } from "react"
+import { Animated, Text, View, StyleSheet, Button } from "react-native"
+
+const App = () => {
+  // fadeAnim will be used as the value for opacity. Initial Value: 0
+  const fadeAnim = useRef(new Animated.Value(0)).current
+
+  const fadeIn = () => {
+    // Will change fadeAnim value to 1 in 5 seconds
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 5000,
+      //启用原生方式渲染动画，渲染效率更高
+      useNativeDriver: true
+    }).start(() => {
+      //这里面是动画结束之后的回调函数
+      alert('显示出来了')
+    })
+  }
+
+  const fadeOut = () => {
+    // Will change fadeAnim value to 0 in 5 seconds
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 5000,
+      //启用原生方式渲染动画，渲染效率更高
+      useNativeDriver: true
+    }).start(() => {
+      alert('我消失了')
+    })
+  }
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.fadingContainer,
+          {
+            opacity: fadeAnim // Bind opacity to animated value
+          }
+        ]}
+      >
+        <Text style={styles.fadingText}>Fading View!</Text>
+      </Animated.View>
+      <View style={styles.buttonRow}>
+        <Button title="Fade In" onPress={fadeIn} />
+        <Button title="Fade Out" onPress={fadeOut} />
+      </View>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  fadingContainer: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: "powderblue"
+  },
+  fadingText: {
+    fontSize: 28,
+    textAlign: "center",
+    margin: 10
+  },
+  buttonRow: {
+    flexDirection: "row",
+    marginVertical: 16
+  }
+})
+
+export default App
+```
+
