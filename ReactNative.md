@@ -234,3 +234,40 @@ const styles = StyleSheet.create({
 ActivityIndicator常用属性：color、size
 
 Platform不是组件，可以用来判断当前系统
+
+## Image
+
+```react
+import { StyleSheet, Text, View, Image, Dimensions } from 'react-native'
+import React from 'react'
+
+export default function App () {
+  return (
+    <View style={styles.container}>
+      <Text>App</Text>
+      <Image style={styles.itemImage}
+        source={require('./assets/favicon.png')}></Image>
+      <Image source={{
+        uri: 'http://www.xxx.com/logo.png'
+      }}></Image>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  itemImage: {
+    height: Dimensions.get('window').height / 5,
+    width: Dimensions.get('window').width / 5,
+    marginVertical: 20
+  }
+})
+```
+
+总结：
+
+Image常用属性：style、source(本地图片用require，线上图片用{uri:xxxx})
