@@ -471,3 +471,256 @@ const styles = StyleSheet.create({
 })
 ```
 
+## SectionList
+
+```react
+import React, { useState } from "react"
+import { StyleSheet, Text, View, SafeAreaView, SectionList, StatusBar } from "react-native"
+
+const DATA = [
+  {
+    title: "Main dishes",
+    data: ["Pizza", "Burger", "Risotto"]
+  },
+  {
+    title: "Sides",
+    data: ["French Fries", "Onion Rings", "Fried Shrimps"]
+  },
+  {
+    title: "Drinks",
+    data: ["Water", "Coke", "Beer"]
+  },
+  {
+    title: "Desserts",
+    data: ["Cheese Cake", "Ice Cream"]
+  }
+]
+
+const Item = ({ title }) => (
+  <View style={styles.item}>
+    <Text style={styles.title}>{title}</Text>
+  </View>
+)
+
+const App = () => {
+  const [isFresh, setIsRefresh] = useState(false)
+  const loadData = () => {
+    setIsRefresh(true)
+    //模拟请求数据
+    setTimeout(() => {
+      setIsRefresh(false)
+      alert('下拉刷新')
+    }, 2000)
+  }
+  return (
+    <SafeAreaView style={styles.container}>
+      <SectionList
+        sections={DATA}
+        keyExtractor={(item, index) => item + index}
+        renderItem={({ item }) => <Item title={item} />}
+        renderSectionHeader={({ section: { title } }) => (
+          <Text style={styles.header}>{title}</Text>
+        )}
+        //项目之间的分隔符
+        ItemSeparatorComponent={() => {
+          return <View style={{ borderBottomWidth: 1, borderBottomColor: 'red' }}></View>
+        }}
+        //列表数据为空时，展示的组件
+        ListEmptyComponent={() => {
+          return <Text>空空如也</Text>
+        }}
+        //下拉刷新
+        refreshing={isFresh}
+        onRefresh={loadData}
+        //上拉加载
+        onEndReachedThreshold={0.1}//声明触底的比率，0.1意思是距离地底部还剩10%
+        onEndReached={() => {
+          alert('到底了')
+        }}
+        //声明列表的头部
+        ListHeaderComponent={() => {
+          return <Text>头部</Text>
+        }}
+        ListFooterComponent={() => {
+          return <Text>没有更多了</Text>
+        }}
+      />
+    </SafeAreaView>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: StatusBar.currentHeight,
+    marginHorizontal: 16
+  },
+  item: {
+    backgroundColor: "#f9c2ff",
+    padding: 20,
+    marginVertical: 8
+  },
+  header: {
+    fontSize: 32,
+    backgroundColor: "#fff"
+  },
+  title: {
+    fontSize: 24
+  }
+})
+
+export default App
+```
+
+## FastList
+
+```react
+import React, { useState } from 'react'
+import { SafeAreaView, View, FlatList, StyleSheet, Text, StatusBar, TouchableOpacity } from 'react-native'
+
+const DATA = [
+  {
+    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+    title: 'First Item',
+  },
+  {
+    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
+    title: 'Second Item',
+  },
+  {
+    id: '58694a0f-3da1-471f-bd96-145571e29d72',
+    title: 'Third Item',
+  },
+  {
+    id: '58694a0f-3da1-471f-bd96-145571e29d73',
+    title: 'Third Item1',
+  },
+  {
+    id: '58694a0f-3da1-471f-bd96-145571e29d74',
+    title: 'Third Item2',
+  },
+  {
+    id: '58694a0f-3da1-471f-bd96-145571e29d75',
+    title: 'Third Item3',
+  },
+  {
+    id: '58694a0f-3da1-471f-bd96-145571e29d76',
+    title: 'Third Item4',
+  },
+  {
+    id: '58694a0f-3da1-471f-bd96-145571e29d77',
+    title: 'Third Item5',
+  },
+  {
+    id: '58694a0f-3da1-471f-bd96-145571e29d78',
+    title: 'Third Item6',
+  },
+  {
+    id: '58694a0f-3da1-471f-bd96-145571e29d79',
+    title: 'Third Item7',
+  },
+  {
+    id: '18694a0f-3da1-471f-bd96-145571e29d79',
+    title: 'Third Item8',
+  },
+  {
+    id: '28694a0f-3da1-471f-bd96-145571e29d79',
+    title: 'Third Item9',
+  },
+]
+
+const Item = ({ title }) => {
+  return (
+    <View style={styles.item}>
+      <Text style={styles.title}>{title}</Text>
+    </View>
+  )
+}
+
+const App = () => {
+  const [isFresh, setIsRefresh] = useState(false)
+  const [selectedId, setSelesctedId] = useState(null)
+  const loadData = () => {
+    setIsRefresh(true)
+    //模拟请求数据
+    setTimeout(() => {
+      setIsRefresh(false)
+      alert('下拉刷新')
+    }, 2000)
+  }
+  const renderItem = ({ item }) => {
+    const backgroundColor = item.id === selectedId ? '#dfb' : '#f9c2ff'
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          setSelesctedId(item.id)
+        }}
+        style={[styles.item, { backgroundColor }]}>
+        <Item title={item.title} />
+      </TouchableOpacity>
+    )
+  }
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={DATA}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+        //水平布局模式
+        // horizontal={true}
+        //初始滚动索引
+        initialScrollIndex={3}
+        //指定初始渲染数据的数量，一般数量要填满一屏幕（有点类似懒加载）
+        initialNumToRender={4}
+        //指定列数，数据项必须等高（无法支持瀑布流）
+        numColumns={2}
+        //列表反转  
+        // inverted={true}
+        extraData={selectedId}
+        //项目之间的分隔符
+        ItemSeparatorComponent={() => {
+          return <View style={{ borderBottomWidth: 1, borderBottomColor: 'red' }}></View>
+        }}
+        //列表数据为空时，展示的组件
+        ListEmptyComponent={() => {
+          return <Text>空空如也</Text>
+        }}
+        //下拉刷新
+        refreshing={isFresh}
+        onRefresh={loadData}
+        //上拉加载
+        onEndReachedThreshold={0.1}//声明触底的比率，0.1意思是距离地底部还剩10%
+        onEndReached={() => {
+          alert('到底了')
+        }}
+        //声明列表的头部
+        ListHeaderComponent={() => {
+          return <Text>头部</Text>
+        }}
+        ListFooterComponent={() => {
+          return <Text>没有更多了</Text>
+        }}
+      />
+    </SafeAreaView>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginTop: StatusBar.currentHeight || 0,
+  },
+  item: {
+    backgroundColor: '#f9c2ff',
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
+  },
+  title: {
+    fontSize: 32,
+  },
+})
+
+export default App
+```
+
