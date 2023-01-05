@@ -350,3 +350,61 @@ const styles = StyleSheet.create({
 总结：
 
 TextInput常用属性要根据输入框类型，具体可以看示例
+
+## Touchable
+
+TouchableHighlight 触碰后，高亮显示
+
+TouchableOpacity 触碰后，透明度降低（模糊显示）
+
+TouchableWithoutFeedback 触碰后，无任何相应
+
+```react
+import {
+  StyleSheet, View, Text,
+  TouchableHighlight,
+  TouchableOpacity,
+  TouchableWithoutFeedback
+} from 'react-native'
+import React from 'react'
+
+export default function App () {
+  return (
+    <View style={styles.container}>
+      <TouchableHighlight
+        onPress={() => console.log('触碰高亮显示')}>
+        <View style={styles.item}>
+          <Text>触碰高亮</Text>
+        </View>
+      </TouchableHighlight>
+      <TouchableOpacity
+        onPress={() => console.log('触碰透明度变化')}>
+        <View style={styles.item}>
+          <Text>触碰透明度变化</Text>
+        </View>
+      </TouchableOpacity>
+      <TouchableWithoutFeedback
+        onPress={() => console.log('触碰无响应')}>
+        <View style={styles.item}>
+          <Text>触碰无响应</Text>
+        </View>
+      </TouchableWithoutFeedback>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  item: {
+    marginBottom: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: 'red'
+  }
+})
+```
+
