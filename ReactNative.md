@@ -62,6 +62,14 @@ const styles = StyleSheet.create({
 })
 ```
 
+## Flex
+
+注意rn里flex的默认方向是从上到下，如果要水平需要设置flexDirection: 'row' 
+
+## Margin
+
+marginVertical只设置上下margin
+
 # 核心组件
 
 ## Button && Alert
@@ -1071,3 +1079,4 @@ navigation.navigate('路由名称',{key:123})
 接收参数：
 
 解构出route，通过const  {key} =  route.params
+
