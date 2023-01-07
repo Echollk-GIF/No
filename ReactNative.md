@@ -361,6 +361,8 @@ TextInput常用属性要根据输入框类型，具体可以看示例
 
 ## Touchable
 
+自己封装的组件没办法直接设置点击后的回调，就可以用touchable包一层再设置
+
 TouchableHighlight 触碰后，高亮显示
 
 TouchableOpacity 触碰后，透明度降低（模糊显示）
