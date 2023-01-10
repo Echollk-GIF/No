@@ -359,6 +359,8 @@ const styles = StyleSheet.create({
 
 TextInput常用属性要根据输入框类型，具体可以看示例
 
+TextInput一般需要有一个宽度才能显示
+
 ## Touchable
 
 自己封装的组件没办法直接设置点击后的回调，就可以用touchable包一层再设置
