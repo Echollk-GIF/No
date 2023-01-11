@@ -46,3 +46,9 @@ module.exports = function (app) {
 yarn add react-router-dom
 ```
 
+引入Antd
+
+```
+yarn add antd
+```
+
