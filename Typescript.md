@@ -49,9 +49,7 @@ let message:string = 'hello world';
   export {};
   ```
 
-  
-
-  * { name: string, age: number }
+  * { name: string, age: number,grade?:number }
 
 * symbol
 
@@ -61,7 +59,21 @@ let message:string = 'hello world';
 
 在定义一个Ts中的函数时，都要明确的指定参数的类型。返回值类型可以明确地指定也可以通过类型推导自行指定
 
-作为参数传递给另一个函数的匿名函数最好不要加类型注解
+大多数作为参数传递给另一个函数的匿名函数最好不要加类型注解
+
+## TypeScript特有的类型
+
+* any
+* unknown
+* void
+  * 定义函数的类型时, 会使用
+* never类型
+  * 自动推导
+  * 封装框架/工具: 校验
+  * 类型工具: never(了解)
+* tuple类型
+  * 介于数组和对象之间类型
+  * useState封装
 
 ## 踩坑
 
