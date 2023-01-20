@@ -57,7 +57,11 @@ let message:string = 'hello world';
 
 * null/undefined
 
+- function
 
+在定义一个Ts中的函数时，都要明确的指定参数的类型。返回值类型可以明确地指定也可以通过类型推导自行指定
+
+作为参数传递给另一个函数的匿名函数最好不要加类型注解
 
 ## 踩坑
 
