@@ -65,8 +65,18 @@ let message:string = 'hello world';
 
 * any
 * unknown
+
+unknown和any类型有点类似，但是unknown类型的值上做任何事情都是不合法的
+
+如果想对unknown类型进行操作，必须先进行类型校验（比如if typeof判断进行类型缩小，再根据类型进行相应的操作）
+
 * void
   * 定义函数的类型时, 会使用
+
+我们可以将undefined赋值给void类型，也就是函数可以返回undefined
+
+当基于上下文的类型推导推导出返回类型为void的时候，并不会强制函数一定不能返回内容
+
 * never类型
   * 自动推导
   * 封装框架/工具: 校验
