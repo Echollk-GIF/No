@@ -25,16 +25,36 @@ let message:string = 'hello world';
 ## JavaScript中的数据类型
 
 * number/Number
+
 * string/String
+
 * boolean
+
 * 数组类型
+
   * any[]
   * Array<any>
+
 * 对象类型
+
   * object
+
+  ```tsx
+  //不要这么做，此时我们既不能获取数据也不能设置数据
+  const myInfo: object = {
+    name: 'name',
+  };
+  console.log(myInfo.name);
+  //类型object上不存在属性name
+  export {};
+  ```
+
+  
+
   * { name: string, age: number }
 
 * symbol
+
 * null/undefined
 
 
