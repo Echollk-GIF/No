@@ -179,6 +179,31 @@ type Direction = "left"|"right"
 * OmitThisParameter
 * ThisType
 
+## TypeScript面向对象
+
+### 类中成员的修饰符
+
+* public
+* private
+* protected
+
+### 枚举类型和值的类型
+
+```tsx
+enum Direction{
+  LEFT,
+  RIGHT
+}
+function turn(direction:Direction){
+  switch(direction){
+    case Direction.LEFT:
+      console.log('LEFT')
+ }
+}
+```
+
+
+
 ## 踩坑
 
 ### ERROR in node_modules/@types/node/globals.global.d.ts(1,44): error TS2304: Cannot find name ‘globalT
