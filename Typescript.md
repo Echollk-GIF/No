@@ -202,7 +202,65 @@ function turn(direction:Direction){
 }
 ```
 
+## 泛型
 
+### 泛型约束
+
+* extends
+
+```tsx
+interface ILength {
+  length:number
+}
+function getInfo<Type extends ILength>(args:Type):Type{
+  return args
+}
+//这里表示是传入的类型必须有这个属性，也可以有其他属性，但是必须至少有这个成员
+```
+
+* keyof 类型 => key的联合类型
+
+```tsx
+//我们希望获取一个对象给定属性名的值,我们需要确保我们不会获取 obj 上不存在的属性
+function getObjectProperty<Type,Key extends keyof Type>(obj:Type,key:Key){
+  return obj[key]
+}
+```
+
+### 映射类型
+
+有的时候，一个类型需要基于另外一个类型，但是你又不想拷贝一份，这个时候可以考虑使用映射类型
+
+```tsx
+interface IPerson {
+  name:string
+  age:number
+}
+type MapType<Type>{
+	[property in keyof Type]:Type[property]
+}
+
+type NewPerson = MapType<IPerson>
+```
+
+**在使用映射类型时，有两个额外的修饰符可能会用到：**
+
+- 一个是 readonly，用于设置属性只读；
+- 一个是 ? ，用于设置属性可选；
+
+可以通过前缀 - 或者 + 删除或者添加这些修饰符，如果没有写前缀，相当于使用了 + 前缀
+
+```tsx
+interface IPerson {
+  name:string
+  age:number
+}
+type MapType<Type>{
+	-readonly [property in keyof Type]-?:Type[property]
+}
+
+type NewPerson = MapType<IPerson>
+```
 
 ## 踩坑
 
