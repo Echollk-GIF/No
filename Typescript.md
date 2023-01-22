@@ -2,11 +2,13 @@
 
 # TypeScript
 
-## JavaScript的缺陷
+## 邂逅TypeScript
+
+### JavaScript的缺陷
 
 * 类型缺失: 对于标识符是没有任何的类型校验, 有安全隐患.
 
-## 定义变量的方式
+### 定义变量的方式
 
 * 类型注解
 
@@ -22,7 +24,7 @@ let message:string = 'hello world';
 
 使用const进行类型推导，推导出来的是字面量类型
 
-## JavaScript中的数据类型
+### JavaScript中的数据类型
 
 * number/Number
 
@@ -61,7 +63,7 @@ let message:string = 'hello world';
 
 大多数作为参数传递给另一个函数的匿名函数最好不要加类型注解
 
-## TypeScript特有的类型
+### TypeScript特有的类型
 
 * any
 * unknown
@@ -84,12 +86,66 @@ unknown和any类型有点类似，但是unknown类型的值上做任何事情都
 
 如果函数陷入死循环或者抛出异常，就可以使用never。实际开发中很少使用
 
-* tuple类型
+* tuple元组类型
   * 介于数组和对象之间类型
   * useState封装
+
+##  TypeScript语法细节
+
+### 类型别名 type和接口类型 interface
+
+* 定义非对象类型时, 肯定使用type
+* 定义对象类型的时候, 都可以
+  * interface更加强大, 扩展性更强（比如可以多次声明同一个接口名称、支持extends继承、interface可以被类实现）
+  * 推荐使用interface
+
+### 联合类型 |
+
+* string | number
+
+### 交叉类型 &
+
+```tsx
+interface IKun {
+  name:string
+}
+interface ICoder {
+  code:()=>void
+}
+const info: Ikun & ICoder = {
+  name:'tom',
+  code:()=>{}
+}
+```
+
+### 类型断言 as
+
+- Element as HTMLImageElement
+
+### 非空类型断言 
+
+- friend!.name = ""
+
+### 字面量类型
+
+字面量类型经常和联合类型一起使用
+
+```tsx
+type Direction = "left"|"right"
+```
+
+as const
+
+### 类型缩小narrowing
+
+*  typeof
+*  平等 ===/!==
+*  instanceof
+*  in
+*  等等
 
 ## 踩坑
 
 ### ERROR in node_modules/@types/node/globals.global.d.ts(1,44): error TS2304: Cannot find name ‘globalT
 
-这个错误一般是项目ts和系统全局安装的ts版本不一致，重新安装ys即可
+这个错误一般是项目ts和系统全局安装的ts版本不一致，重新安装ts即可
