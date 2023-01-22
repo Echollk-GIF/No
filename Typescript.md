@@ -134,7 +134,7 @@ const info: Ikun & ICoder = {
 type Direction = "left"|"right"
 ```
 
-as const
+字面量推理as const
 
 ### 类型缩小narrowing
 
@@ -143,6 +143,41 @@ as const
 *  instanceof
 *  in
 *  等等
+
+## TypeScript函数类型
+
+### 函数类型表示方式
+
+* 函数类型表达式: () => void、(num:number)=>number
+* 函数调用签名: interface { 其他属性; (): void } /{(num:number):number}
+* 函数构造签名: interface { 其他属性; new (): void }
+
+### 函数的参数细节
+
+* 可选参数: 类型 | undefined
+* 参数默认值: x = 100
+* 剩余参数: ...args: number[]
+
+### 函数的重载使用（了解）
+
+* 重载签名
+* 重载实现(通用函数)
+  * 不能被调用
+* 和联合类型的选择:
+  * 能使用联合类型尽量使用联合类型
+
+### this的绑定问题
+
+* 默认this是any类型
+* 开发*noImplicitThis设置为true*, this在上下文不能正确推导的情况下, 必须明确的指定
+  * 作为第一个参数, 并且名字必须加this
+  * 后续传入的参数是从第二个开始, 编译出来的代码, this类型会被抹除
+
+### this相关内置工具
+
+* ThisParameterType
+* OmitThisParameter
+* ThisType
 
 ## 踩坑
 
