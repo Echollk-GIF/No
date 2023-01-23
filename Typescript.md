@@ -262,6 +262,165 @@ type MapType<Type>{
 type NewPerson = MapType<IPerson>
 ```
 
+## 类型工具
+
+### 条件类型
+
+日常开发中我们需要基于输入的值来决定输出的值，同样我们也需要基于输入的值的类型来决定输出的值的类型
+
+```tsx
+function sum<T extends number | string>(arg1:T,arg2:T):T extends string ? string : number
+function sum(arg1:any,arg2:any)[
+  return arg1+arg2
+]
+```
+
+### 在条件类型中推断（infer）
+
+条件类型提供了 infer 关键词，可以从正在比较的类型中推断类型，然后在 true 分支里引用该推断结果
+
+```tsx
+//比如我们现在有一个数组类型，想要获取到一个函数的参数类型和返回值类型
+type CalcFnType = (num1:number,num2:number)=>number
+
+type MyReturnType<T extends(...args:any[])=>any> = T extends (...args:any[]) => infer R ? R :never
+```
+
+### 分发条件类型
+
+ 当在泛型中使用条件类型的时候，如果传入一个联合类型，就会变成分发的
+
+```tsx
+type toArray<Type> = Type extends any ? Type[] :never
+
+//string[] | number[]
+type newType = toArray<number|string>
+```
+
+**如果我们在 ToArray 传入一个联合类型，这个条件类型会被应用到联合类型的每个成员：**
+
+当传入string | number时，会遍历联合类型中的每一个成员；
+
+相当于ToArray<string> | ToArray<number>； 
+
+所以最后的结果是：string[] | number[]；
+
+## 内置工具
+
+### Partial<Type>
+
+用于构造一个Type下面的所有属性都设置为可选的类型
+
+```tsx
+type MyPartial<T> = {
+  [P in keyof T]?:T[P]
+}
+```
+
+### Required<Type>
+
+用于构造一个Type下面的所有属性全都设置为必填的类型，这个工具类型跟 Partial 相反。
+
+```tsx
+type MyRequired<T> = {
+  [P in keyof T]-? :T[P]
+}
+```
+
+### Readonly<Type>
+
+用于构造一个Type下面的所有属性全都设置为只读的类型，意味着这个类型的所有的属性全都不可以重新赋值。
+
+```tsx
+type MyPartial<T> = {
+  readonly [P in keyof T]:T[P]
+}
+```
+
+### Record<Keys, Type>
+
+用于构造一个对象类型，它所有的key(键)都是Keys类型，它所有的value(值)都是Type类型。
+
+```tsx
+type MyRecord<K extends key of any,T> = {
+  [P in K] : T
+}
+```
+
+### Pick<Type, Keys>
+
+用于构造一个类型，它是从Type类型里面挑了一些属性Keys
+
+```tsx
+type MyPick<T,K extends keyof T> = {
+  [p in K]: T[P]
+}
+interface IPerson{
+  name:string
+  age:number
+  height:number
+}
+type IKun = Pick<IPerson,"name"| "age">
+```
+
+### Omit<Type, Keys>
+
+用于构造一个类型，它是从Type类型里面过滤掉了一些属性Keys
+
+```tsx
+type MyOmit<T,K> = {
+  [P in keyof T as P extends K ? never : P]:T[P]
+}
+interface IPerson{
+  name:string
+  age:number
+  height:number
+}
+type IKun = Omit<IPerson,"name"| "age">
+```
+
+### Exclude<UnionType, ExcludedMembers>
+
+用于构造一个类型，它是从UnionType联合类型里面排除了所有可以赋给ExcludedMembers的类型。
+
+```tsx
+type MyExclude<T,U> = T extends U ? never : T
+
+type PropertyTypes = "name"|"age"|"height"
+type PropertyTypes2 = MyExclude<PropertyTypes,"height">
+```
+
+### Extract<Type, Union>
+
+用于构造一个类型，它是从Type类型里面提取了所有可以赋给Union的类型。
+
+```tsx
+type MyExtract<T,U> = T extends U ? T :never
+
+type PropertyTypes = "name"|"age"|"height"
+type PropertyTypes2 = MyExtract<PropertyTypes,"height">
+```
+
+### NonNullable<Type>
+
+用于构造一个类型，这个类型从Type中排除了所有的null、undefined的类型。
+
+```tsx
+type IKun = "sing" | "dance"
+type MyNonNullable<T> = T extends null | undefined ? never:T
+type Ikuns = MyNonNullable<IKun>
+```
+
+### ReturnType<Type>
+
+```tsx
+type MyReturnType<T extends(...args:any[])=>any> = T extends (...args:any[]) => infer R ? R :never
+```
+
+### InstanceType<Type>
+
+用于构造一个由所有Type的构造函数的实例类型组成的类型。
+
 ## 踩坑
 
 ### ERROR in node_modules/@types/node/globals.global.d.ts(1,44): error TS2304: Cannot find name ‘globalT
