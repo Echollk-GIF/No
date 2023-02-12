@@ -10,6 +10,25 @@
 
 如果一个函数同时满足（1）相同的输入始终获得相同的输出（2）不会修改程序的状态或引起副作用这两个条件，则为纯函数
 
+# 生命周期
+
+类组件生命周期：
+
+- render阶段：
+  1. mount时：组件首先会经历constructor、getDerivedStateFromProps、componnetWillMount（不推荐）、render
+  2. update时：组件首先会经历componentWillReceiveProps（不推荐）、getDerivedStateFromProps、shouldComponentUpdate、render
+  3. error时：会调用getDerivedStateFromError
+- commit阶段
+  1. mount时：组件会经历componnetDidMount
+  2. update时：组件会调用getSnapshotBeforeUpdate、componnetDidUpdate
+  3. unMount时：调用componnetWillUnmount（不推荐）
+  4. error时：调用componnetDidCatch
+
+在mount时和update时更新的具体顺序：
+
+- mount时：首先会按照深度优先的方式，依次构建workinProgress Fiber节点然后切换成current Fiber，在render阶段会依次执行各个节点的constructor、getDerivedStateFromProps/componnetWillMount、render，在commit阶段，也就是深度优先遍历向上冒泡的时候依次执行节点的componnetDidMount
+- update时：同样会深度优先构建workinProgress Fiber树，在构建的过程中会diff子节点，在render阶段，如果返现有节点的变化，那就标记这个节点Update Flag，然后执行getDerivedStateFromProps和render，在commit阶段会依次执行节点的getSnapshotBeforeUpdate、componnetDidUpdate
+
 # React的架构
 
 React的架构可以分为三个部分：
@@ -129,6 +148,122 @@ Fiber Tree的构建：
 （1）根据current Fiber创建workInProgress Fiber
 
 （2）把workInProgress Fiber Tree切换成current Fiber Tree
+
+# Hooks
+
+关于ClassComponent有两个问题（1）业务逻辑分散（2）有状态的逻辑复用困难，虽然有render props和高阶组件，但是也引入了新的复杂度。
+
+**hooks数据结构**
+
+在FunctionComponent中，多个hook会形成hook链表，保存在Fiber的memoizedState的上，而需要更新的Update保存在hook.queue.pending中
+
+```js
+const hook: Hook = {
+  memoizedState: null,//对于不同hook，有不同的值
+  baseState: null,//初始state
+  baseQueue: null,//初始queue队列
+  queue: null,//需要更新的update
+  next: null,//下一个hook
+};
+```
+
+memoizedState对应的值
+
+- useState：例如`const [state, updateState] = useState(initialState)`，`memoizedState等于`state的值
+- useReducer：例如`const [state, dispatch] = useReducer(reducer, {});`，`memoizedState等于`state的值
+- useEffect：在mountEffect时会调用pushEffect创建effect链表，`memoizedState`就等于effect链表，effect链表也会挂载到fiber.updateQueue上，每个effect上存在useEffect的第一个参数回调和第二个参数依赖数组，例如，`useEffect(callback, [dep])`，effect就是{create:callback, dep:dep,...}
+- useRef：例如`useRef(0)`，memoizedState`就等于`{current: 0}
+- useMemo：例如`useMemo(callback, [dep])`，`memoizedState`等于`[callback(), dep]`
+- useCallback：例如`useCallback(callback, [dep])`，`memoizedState`等于`[callback, dep]`。`useCallback`保存`callback`函数，`useMemo`保存`callback`的执行结果
+
+## useState&useReducer
+
+之所以把useState和useReducer放在一起，是因为在源码中useState就是有默认reducer参数的useReducer。
+
+- mount阶段
+
+   mount阶段useState调用mountState，useReducer调用mountReducer，唯一区别就是它们创建的queue中lastRenderedReducer（代表上一次render时使用的reducer）不一样，mount有初始值basicStateReducer，所以说useState就是有默认reducer参数的useReducer。
+
+- update阶段
+
+  update时会根据hook中的update计算新的state
+
+- 执行阶段
+
+  useState执行setState后会调用dispatchAction，dispatchAction做的事情就是讲Update加入queue.pending中，然后开始调度
+
+## useEffect
+
+- mount阶段
+
+   调用mountEffect，mountEffect调用mountEffectImpl，hook.memoizedState赋值为effect链表
+
+  ```jsx
+  function mountEffectImpl(fiberFlags, hookFlags, create, deps): void {
+    const hook = mountWorkInProgressHook();//获取hook
+    const nextDeps = deps === undefined ? null : deps;//依赖
+    currentlyRenderingFiber.flags |= fiberFlags;//增加flag
+    hook.memoizedState = pushEffect(//memoizedState=effects环状链表
+      HookHasEffect | hookFlags,
+      create,
+      undefined,
+      nextDeps,
+    );
+  }
+  ```
+
+- update阶段
+
+   浅比较依赖，如果依赖性变了pushEffect第一个参数传HookHasEffect | hookFlags，HookHasEffect表示useEffect依赖项改变了，需要在commit阶段重新执行
+
+- 执行阶段
+
+   commit阶段的commitLayoutEffects函数中会调用schedulePassiveEffects，将useEffect的销毁和回调函数push到pendingPassiveHookEffectsUnmount和pendingPassiveHookEffectsMount中，然后在mutation之后调用flushPassiveEffects依次执行上次render的销毁函数回调和本次render 的回调函数
+
+## useRef
+
+ sring类型的ref已经不在推荐使用(源码中string会生成refs，发生在coerceRef函数中)，ForwardRef只是把ref通过传参传下去，createRef也是{current: any这种结构，所以我们只讨论function或者{current: any}的useRef
+
+- mount阶段
+
+   mount时会调用mountRef，创建hook和ref对象。
+
+  ```js
+  function mountRef<T>(initialValue: T): {|current: T|} {
+    const hook = mountWorkInProgressHook();//获取useRef
+    const ref = {current: initialValue};//ref初始化
+    hook.memoizedState = ref;
+    return ref;
+  }
+  ```
+
+  render阶段：将带有ref属性的Fiber标记上Ref Tag，这一步发生在beginWork和completeWork函数中的markRef       
+
+   commit阶段：
+
+   会在commitMutationEffects函数中判断ref是否改变，如果改变了会先执行commitDetachRef先删除之前的ref，然后在commitLayoutEffect中会执行commitAttachRef赋值ref。
+
+- update阶段
+
+   update时调用updateRef获取获取当前useRef，然后返回hook链表
+
+## useMemo&useCallback
+
+- mount阶段
+
+  mount阶段useMemo和useCallback唯一区别是在memoizedState中存贮callback还是callback计算出来的函数
+
+- update阶段
+
+  update时也一样，唯一区别就是直接用回调函数还是执行回调后返回的value作为[?, nextDeps]赋值给memoizedState
+
+## useLayoutEffect
+
+useLayoutEffect和useEffect一样，只是调用的时机不同，它是在commit阶段的commitLayout函数中同步执行
+
+## forwardRef
+
+forwardRef也非常简单，就是传递ref属性
 
 # Schedule调度器
 
@@ -295,6 +430,53 @@ performUnitOfWork的工作可以分为两个部分：“递”和“归”
 当遍历到叶子元素（不包含子FiberNode时），performUnitOfWork就会进入“归”阶段
 
 “归”阶段会调用completeWork方法处理fiberNode。当某个fiberNode执行完completeWork方法后，如果其存在兄弟fiberNode，会进入其兄弟fiberNode的“递”阶段，如果不存在兄弟fiberNode，则进入父fiberNode的“归”阶段。
+
+## Diff算法
+
+在beginWork中，没有命中bailout策略的fiberNode会根据是mount或者update分别进入mountChildFibers和reconcileChildFibers，它们的区别在于是否标记flags，这个流程统称为reconcile流程。reconcile流程的本质是对比current fiberNode与JSX对象生成wip fiberNode，这个流程的核心算法就是diff算法。
+
+为了降低算法复杂度，React的diff算法会有三个限制
+
+（1）只对同级元素进行Diff，如果一个DOM元素在前后两次更新中跨越了层级，那么React不会尝试复用它
+
+（2）两个不同类型的元素会产生不同的树，即元素的类型不同就不再复用（如div变为p）
+
+（3）开发者可以通过key来暗示哪些子元素在不同的渲染下能够保持稳定
+
+根据Diff算法只对同级元素进行DIff，所以可以分为单节点Diff和多节点Diff
+
+**单节点Diff**
+
+- key和type相同表示可以复用节点
+- key不同直接标记删除节点，然后新建节点
+- key相同type不同，标记删除该节点和兄弟节点，然后新创建节点
+
+**多节点Diff**
+
+在源码中多节点diff有三个for循环遍历（并不意味着所有更新都有经历三个遍历，进入循环体有条件，也有条件跳出循环），第一个遍历处理节点的更新（包括props更新和type更新和删除），第二个遍历处理其他的情况（节点新增），其原因在于在大多数的应用中，节点更新的频率更加频繁，第三个处理位节点置改变
+
+- 第一次遍历 因为老的节点存在于current Fiber中，所以它是个链表结构，Fiber双缓存结构，节点通过child、return、sibling连接，而newChildren代表JSX对象，数据结构是数组，所以遍历对比的时候，让newChildren[i]`与`oldFiber对比判断是否可以复用，在第一轮遍历中，会处理几种情况
+
+  1. key不同，第一次循环结束
+  2. newChildren或者oldFiber遍历完，第一次循环结束
+  3. key同type不同，标记oldFiber为DELETION
+  4. key相同type相同则可以复用
+
+   如果newChildren遍历完且oldFiber没遍历完，意味着有旧节点被删除，则将oldFiber中没遍历完的节点标记为DELETION，即删除的DELETION Tag
+
+- 第二个遍历 第二个遍历考虑情况
+
+  1. newChildren和oldFiber都遍历完：多节点diff过程结束
+  2. newChildren没遍历完，oldFiber遍历完，将剩下的newChildren的节点标记为Placement，即插入的Tag
+  3. newChildren和oldFiber没遍历完，则进入节点移动的逻辑
+
+- 第三个遍历 主要逻辑在placeChild函数中，例如更新前节点顺序是ABCD，更新后是ACDB（lastPlacedIndex是最后一个可复用oldFiber的位置索引）
+
+  1. newChild中第一个位置的A和oldFiber第一个位置的A，key相同可复用，lastPlacedIndex=0
+  2. newChild中第二个位置的C和oldFiber第二个位置的B，key不同跳出第一次循环，将oldFiber中的BCD保存在map中
+  3. newChild中第二个位置的C在oldFiber中的index=2 > lastPlacedIndex=0不需要移动，lastPlacedIndex=2
+  4. newChild中第三个位置的D在oldFiber中的index=3 > lastPlacedIndex=2不需要移动，lastPlacedIndex=3
+  5. newChild中第四个位置的B在oldFiber中的index=1 < lastPlacedIndex=3,移动到最后
 
 ## beginWork
 
@@ -719,6 +901,32 @@ const update = {
 }
 ```
 
+update的紧急程度由lane字段表示，update.next指向下一个update，构成一条环状链表。
+
+updateQueue是保存“参与state计算的相关数据”的数据结构。
+
+```js
+const updateQueue = {
+  baseState = null,
+  firstBaseUpdate = null,
+  lastBaseUpdate = null,
+  shared:{
+  	pending:null
+ }
+}
+//baseState代表参与计算的初始state，update基于该state计算state
+//firstBaseUpdate与lastBaseUpdate代表本次更新前该fiberNode中已保存的update
+//share.pendig，触发更新后，产生的update会保存在shared.pending中形成单向环状链表。计算state时，该环状链表会被拆分拼接在lastBaseUpdate后面
+```
+
+state计算的流程可以简单概括为两步：
+
+（1）将baseState与shared.pending拼接成新链表
+
+（2）遍历拼接后的新链表，根据workInProgressRootRenderLanes选定的优先级，基于“符合优先级条件的update”计算state
+
+
+
 
 
 # 错误处理
@@ -786,4 +994,20 @@ ReactDOM.render(element,container,()=>{
   //用于抛出未捕获的错误及React提示信息的callback
 })
 ```
+
+# 性能优化
+
+React有多个与性能优化相关的API，比如shouldComponentUpdate、PureComponent、React.memo、useMemo、useCallback。这些API的出现是因为React无法像Vue一样在编译时做出优化，所以这部分工作放在运行时交给开发者完成。但实际上，React内部有完整的运行时性能优化策略，开发者调用性能优化API或者编写符合性能优化策略的组件的本质就是在命中优化策略
+
+## eagerState策略
+
+eagerState在触发更新时存在，策略的逻辑比较简单：如果某个状态更新前后没有变化，则可以跳过后续更新流程。也就是说命中这个策略的组件的子组件会跳过reconcile流程（即子组件不会进入render阶段）
+
+## bailout策略
+
+bailout在render阶段存在，首先beginWork的目的是生成wip fiberNode的子fiberNode，实现这个目的存在两条路径：（1）通过reconcole流程生成子fiberNode（2）通过bailout策略复用子fiberNode
+
+命中bailout策略表示子fiberNode没有变化(state、props、context没有变化)，可以复用
+
+例如通过wip.childLanes可以快速排查“当前fiberNode的整棵子树中是否存在更新”，如果不存在则可以跳过整棵子树的beginWork，这也是React每次更新都会生成整棵Fiber Tree，但性能并不差的重要原因
 
