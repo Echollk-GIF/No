@@ -1,9 +1,5 @@
 [TOC]
 
-# 问题
-
-为什么要把Effects List替换为subtreeFlags
-
 # 概念
 
 ## 副作用
@@ -114,9 +110,9 @@ Fiber架构中同时存在两棵Fiber树，一颗是真实UI对应的Fiber树，
 
 ## Fiber Tree
 
-### Fiber Tree的构建
+Fiber Tree的构建：
 
-#### mount
+**mount**
 
 有两种情况：整个应用的首次渲染、某个组件的首次渲染（没有下述1、2两步）
 
@@ -128,13 +124,147 @@ Fiber架构中同时存在两棵Fiber树，一颗是真实UI对应的Fiber树，
 
  （4）把workInProgress Fiber Tree切换成current Fiber Tree
 
-#### Update
+**Update**
 
 （1）根据current Fiber创建workInProgress Fiber
 
 （2）把workInProgress Fiber Tree切换成current Fiber Tree
 
-# Reconciler（render阶段）
+# Schedule调度器
+
+React实现了一套基于lane模型的优先级算法，并基于这套算法实现了Batched Updates（批量更新）、任务打断/恢复机制等特性。
+
+Scheduler对外导出的scheduleCallback（优先级,fn）方法接收优先级与回调函数fn去调度fn的执行，这个方法会返回task这一数据结构代表一个被调度的任务work，task.calback = fn,task.expirationTime:startTime+timeout，startTime一般为执行scheduleCallBack时的当前时间，如果传递了delay参数还会在此基础上增加延迟时间，不同优先级对应不同的timeout。
+
+根据是否传递delay参数，执行scheduleCallBack方法后生成的task会进入timerQueue或taskQueue，其中timerQueue中的task以currentTime+delay为排序依据，taskQueue中的task以expirationTime为排序依据
+
+当timerQueue中的第一个task延迟的时间到期后，执行advanceTimers将到期的task从timerQueue移动到taskQueue中
+
+接下来执行requestHostCallback方法，它会在新的宏任务中执行workLoop方法。workLoop方法会循环消费taskQueue中的task，直至taskQueue中不存在task或者Time Slice时间用完且当前task未过期则中断循环。
+
+循环中断后如果taskQueue不为空，则继续执行requestHostCallback方法，如果timerQueue不为空则继续执行advanceTimers方法
+
+执行是通过perform方法执行。
+
+work的工作流程随时可能中断（shouldYield），比如React应用很复杂需要遍历很多组件的情况或者React单个组件render逻辑复杂的情况。但是当满足work的priority是ImmediatePriority时即同步优先级或者priority是didTimeout即本次调度已过期时，work对应的工作不会中断而是同步执行直到work结束。
+
+didTimeout这个参数的意义是为了避免饥饿问题，当一个work长时间未执行完，随着时间推移当前时间离work.expirationTime越近，work的优先级越高。当work.expirationTime小于当前时间即该work已经过期，表现为didTimeout为true，过期work会被同步执行。
+
+Schedule存在一大一小两种循环，大循环式调度优先级最高的任务的执行，小循环是调度一个相同优先级任务的反复执行。
+
+## 优先级队列的实现
+
+用小顶堆的数据结构实现优先级队列，小顶堆的特点是：是一棵完全二叉树，除最后一层外，其他层的节点个数都是满的，且最后一层节点是靠左排列，并且堆中每一个节点的值都小于等于其子树的每一个值。完全二叉树很适合用数组保存，用数组下标代表指向左右子节点的指针，比如数组下标为i的节点的左右子节点下标分别为2i+1、2i+2。
+
+push向堆中推入数据和pop从堆顶取出数据时间复杂度与二叉树的高度正相关。为O(log n)
+
+peek获取排序依据最小的值对应节点时间复杂度为O(1)
+
+## 宏任务的选择
+
+workLoop方法会在新的宏任务中执行，浏览器会在宏任务执行间隔执行Layout、Paint。
+
+（1）requestIdleCallback（简称rIC），它会在每帧的空闲时期执行，但有如下缺点：浏览器兼容性、执行频率不稳定比如切换浏览器Tab之后之前Tab注册的rIC执行的频率会被大幅降低。再有就是rIC的设计初衷是能够在事件循环中执行低优先级的工作从而减少对动画、用户输入等高优先级事件的影响，这意味着rIC的应用场景被局限在低优先级工作中，这与Schedule中多种优先级的调度策略不符。
+
+（2）requestAnimationFrame（建成rAF），这个API定义的回调函数会在浏览器下次Paint前执行，一般用于更新动画。因为rAF的执行时机取决于每一帧Paint前的时机，即它的执行与帧相关，执行频率不高，满足条件的话应该一帧时间内可以执行多次并且执行时机越早越好。
+
+**Schedule最终选择**
+
+（1）在支持setImmediate的环境（Nodejs）中，Schedule使用setImmediate调度宏任务。原因是不同于MessageChannel，它不会阻止Nodejs进程退出，并且相比MessageChannel执行时机更早。
+
+（2）在支持MessageChannel的环境（浏览器、worker）中，使用MessageChannel调度宏任务。这个API会创建一个新的消息通道，并通过它的两个MeaagePort属性发送数据，接收消息的回调函数onmessage会在新的宏任务重执行。
+
+（3）其他情况使用setTimeOut调度宏任务
+
+## Lane模型
+
+Lane的和Scheduler是两套优先级机制，相比来说Lane的优先级粒度更细，Lane的意思是车道，类似赛车一样，在task获取优先级时，总是会优先抢内圈的赛道
+
+Scheduler预置了五种优先级，优先级依次降低：
+
+- ImmediatePriority（最高优先级，同步执行） 
+- UserBlockingPriority 
+- NormalPriority 
+- LowPriority 
+- IdlePriority（最低优先级）
+
+作为独立的包，考虑到通用性，Scheduler和React并不共用一套优先级体系，React有四种优先级：
+
+```js
+export const DiscreteEventPriority = SyncLane
+//DiscreteEventPriority对应离散事件的优先级，例如click、input、focus等事件
+export const ContinuousEventPriority = InputContinuousLane
+//ContinuousEventPriority对应连续事件的优先级，例如drag、mounsemove、scroll等事件
+export const DefaultEventPriority = DefaultLane
+//DefaultEventPriority对应默认的优先级，例如通过计时器周期性触发更新
+export const IdleEventPriority = IdleLane
+//IdleEventPriority对应空闲状态的优先级
+```
+
+从React到Schedule优先级要经历两次变换（1）将lanes转换为EventPriority（2）将EventPriority转换为Schedule优先级
+
+lane模型需要解决两个基本问题：（1）以优先级为依据，对update进行排序（2）表达“批”的概念
+
+对于第一个问题，一个lane就是一个32bit Int。最高位是符号位所以最多可以有31位参与运算。不同的优先级对应不同lane，越低的位代表越高的优先级。
+
+对于第二个问题，React为TransitionLane预留了16个位，通过位运算可以判断某一优先级（某一lane）是否属于同一批（某个lanes）。expirationTime模型经过改进最多只能将范围内的update划分为批，而lane模型可以将多个不相邻的优先级划分为批。
+
+**Lane模型中task是怎么获取优先级的（赛车的初始赛道）**
+
+ 任务获取赛道的方式是从高优先级的lanes开始的，这个过程发生在findUpdateLane函数中，如果高优先级没有可用的lane了就下降到优先级低的lanes中寻找，其中pickArbitraryLane会调用getHighestPriorityLane获取一批lanes中优先级最高的那一位，也就是通过`lanes & -lanes`获取最右边的一位
+
+```js
+export function findUpdateLane(
+  lanePriority: LanePriority,
+  wipLanes: Lanes,
+): Lane {
+  switch (lanePriority) {
+    //...
+    case DefaultLanePriority: {
+      let lane = pickArbitraryLane(DefaultLanes & ~wipLanes);//找到下一个优先级最高的lane
+      if (lane === NoLane) {//上一个level的lane都占满了下降到TransitionLanes继续寻找可用的赛道
+        lane = pickArbitraryLane(TransitionLanes & ~wipLanes);
+        if (lane === NoLane) {//TransitionLanes也满了
+          lane = pickArbitraryLane(DefaultLanes);//从DefaultLanes开始找
+        }
+      }
+      return lane;
+    }
+  }
+}
+```
+
+**Lane模型中高优先级是怎么插队的（赛车抢赛道）**
+
+ 在Lane模型中如果一个低优先级的任务执行，并且还在调度的时候触发了一个高优先级的任务，则高优先级的任务打断低优先级任务，此时应该先取消低优先级的任务，因为此时低优先级的任务可能已经进行了一段时间，Fiber树已经构建了一部分，所以需要将Fiber树还原，这个过程发生在函数prepareFreshStack中，在这个函数中会初始化已经构建的Fiber树
+
+```js
+function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
+  const existingCallbackNode = root.callbackNode;//之前已经调用过的setState的回调
+  //...
+	if (existingCallbackNode !== null) {
+    const existingCallbackPriority = root.callbackPriority;
+    //新的setState的回调和之前setState的回调优先级相等 则进入batchedUpdate的逻辑
+    if (existingCallbackPriority === newCallbackPriority) {
+      return;
+    }
+    //两个回调优先级不一致，则被高优先级任务打断，先取消当前低优先级的任务
+    cancelCallback(existingCallbackNode);
+  }
+	//调度render阶段的起点
+	newCallbackNode = scheduleCallback(
+    schedulerPriorityLevel,
+    performConcurrentWorkOnRoot.bind(null, root),
+  );
+	//...
+}
+```
+
+**Lane模型中怎么解决饥饿问题**
+
+ 在调度优先级的过程中，会调用markStarvedLanesAsExpired遍历pendingLanes（未执行的任务包含的lane），如果没过期时间就计算一个过期时间，如果过期了就加入root.expiredLanes中，然后在下次调用getNextLane函数的时候会优先返回expiredLanes
+
+# Reconciler协调器（render阶段）
 
 Reconciler工作的阶段在React内部被称为render阶段，根据Scheduler调度的结果不同，render阶段可能开始于performSyncWorkOnRoot（同步更新流程）或performConcurrentWorkOnRoot（并发更新流程）方法。
 
@@ -409,7 +539,7 @@ completeWork  update具体流程
 
 （4）执行diffProperties方法，这个方法包括两次遍历。第一次遍历标记删除“更新前有，更新后没有的属性”，第二次遍历标记更新“update流程前后发生改变”的属性。所有变化的属性会通过key、value的形式保存在updatePayload属性中，diffProperties方法最后会返回updatePayload并作为数组的相邻两项依次保存在fiberNode.updateQueue数组中，同时该fiberNode的flags会标记Update
 
-# Renderer(commit阶段)
+# Renderer渲染器(commit阶段)
 
 在render阶段的末尾会调用commitRoot(root)进入commit阶段，这里的root指的就是fiberRootNode。
 
@@ -466,10 +596,194 @@ FIber架构早期版本没有用subtreeFlags而是Effects List的链表结构保
 
 所以Concurretn Suspensr针对Suspense内不显示的子树进行了单独的处理，几不会渲染设置display:none的内容，也不会执行useEffect回调。要实现这部分处理，需要改变commit阶段的遍历方式，即将Effect List重构为subtreeFlags
 
-## 错误处理
+## BeforeMutation阶段
+
+BeforeMutation阶段的工作主要发生在commitBeforeMutationEffects_complete中和commitBeforeMutationEffectsOnFiber方法中，整个过程主要处理两种类型的FIberNode
+
+ClassComponent，执行getSnapshotBeforeUpdate方法
+
+HostRoot，清空HostRoot挂载的内容，方便Mutation阶段渲染
+
+## Mutation阶段
+
+Mutation阶段的工作主要是进行DOM元素的增删改
+
+**删除DOM元素**
+
+在commitMutationEffects_begin向下遍历过程中会执行删除操作
+
+整个删除操作是以DFS的顺序，遍历子树的每个fiberNode执行对应操作
+
+会for循环遍历fiber.deletions数组一次执行commitDeletion方法执行删除操作，数组中的项是在render阶段的beginWork执行reconcile操作时，发现需要删除子fiberNode对应的DOM元素时，执行deleteChild方法添加的
+
+**插入、移动DOM元素（placement）**
+
+进入commitMutationEffects_complete方法后，其会对遍历到的每个fiberNode执行commitMutationEffectsOnFiber，该方法会执行具体的DOM操作，其实就是switch操作情况如插入、移动等分别进入不同逻辑比如placement flag对应commitPlacement方法
+
+commitPlacement方法步骤：
+
+（1）从当前fiberNode向上遍历，获取第一个类型为HostComponent、HostRoot、HostPortal三者之一的祖先fiberNode，其对应的DOM元素时执行DOM操作的目标元素的父级DOM元素
+
+（2）获取用于执行parentNode.insertBefore(child,before)方法的before对应DOM元素（该DOM元素必须是稳定的即before对应的fiberNode不能被标记为placementflag，如果最终没有被找到，只能选择插入到父DOM元素的末尾）
+
+（3）执行parentNode.insertBefore方法（存在before）或者parentNode.appendChild方法(不存在before)
+
+**更新DOM元素**
+
+执行DOM元素更新操作的方法是commitWork，因为所有变化属性的key、value会保存在fiberNode.updateQueue中，当finishedWork.updateQueue存在时，其最终会在updateDOMProperties方法中遍历并改变对应属性，处理如style属性变化、innerHTML、直接文本节点变化等变化
+
+**Fiber Tree切换**
+
+当Mutation阶段的主要工作完成进入Layout阶段前，会执行root.current = finishedWork进行Fiber Tree的切换
+
+## Layout阶段
+
+Layout阶段会在commitLayoutEffects_begin向下遍历过程中会执行OffscreenComponent的显/隐逻辑
+
+进入commitLayoutEffects_complete方法后，其会对遍历到的每个fiberNode执行commitLayoutEffectOnFiber根据fiberNode.tag不同执行不同的操作，比如对于ClassComponent，在该阶段执行componentDidMount/Update方法。对于FC，在该阶段执行useLayoutEffect callback
+
+同时对于ClassComponent，执行this.setState(newState,callback)和对于HostRoot执行ReactDOM.render(element,container,callback)中的callback，都会在这个commitLayoutEffectOnFiber中执行
+
+# 状态更新
+
+## 事件系统
+
+**合成事件**
+
+合成事件是对浏览器原生事件对象的封装，存在的目的是消除不同浏览器在事件对象间的差异，但是对于不支持某一事件的浏览器，合成事件并不会提供polyfill（因为这会显著增加ReactDOM的体积）
+
+**实现传播机制**
+
+利用事件委托的原理，React基于Fiber Tree实现了事件的“捕获、目标、冒泡”流程，并且加入了新特性比如不同事件对应不同优先级、定制事件名、定制事件行为。
+
+事件传播机制的实现步骤：
+
+（1）在根元素绑定“事件类型对应的事件回调”，所有子孙元素触发这类事件最终都会委托给“根元素的事件回调”处理
+
+（2）寻找触发事件的DOM元素，找到其对应的fiberNode
+
+（3）收集从当前fiberNode到HostRootFiber之间“所有注册的该事件的回调函数”，实现思路是从当前fiberNode向上遍历，直到HostRootFiber，收集遍历过程中fiberNode.memoizedProps属性内保存的对应事件回调，最后返回的是一个数组
+
+（4）反向遍历并执行一遍收集的所有回调函数（模拟捕获阶段的实现）
+
+（5）正向遍历并执行一遍收集的所有回调函数（模拟冒泡阶段的实现，如果不允许冒泡则停止遍历就可以）
+
+## Update
+
+可以用git来比喻Update，比如我们在逐步迭代需求ABC，突然遇到紧急线上bug为D。我们就暂存当前分支的修改，在master分支修复bug并紧急上线。bug修复上线后通过gir rebase与开发分支连接，开发分支基于修复bug的版本继续开发。
+
+同理，高优先级update会中断正在进行中的低优先级update，待完成后低优先级update基于高优先级update计算出的state重新完成更新流程。
+
+在react中触发状态更新的几种方式：
+
+- ReactDOM.render(ReactDOM.createRoot)对应HostRoot
+- this.setState对应ClassComponent
+- this.forceUpdate对应ClassComponent
+- useState对应FunctionComponent
+- useReducer对应FunctionComponent
+
+以上方法在fiberNode.tag中对应三种tag:HostRoot、ClassComponent、FunctionComponent。
+
+存在两种不同数据结构的Update，ClassComponent和HostRoot共用一种，FunctionComponent单独用一种。
+
+ClassComponent和HostRoot用的Update数据结构：
+
+```js
+function createUpdate(eventTime,lane){
+  let update = {
+    eventTime,
+    lane,
+    //区别触发更新的场景，UpdateState表示使用ReactDOM.createRoot或者this.setState触发更新
+    //ReplaceUpdate表示在ClassComponent生命周期函数中改变this.state
+    //CaptureUpdate表示发生错误的情况相爱在ClassComponent或者HostRoot中触发更新，比如getDerivedStateFromError
+    //ForceUpdate表示通过this.forceUpdate触发更新
+    tag:UpdateState,
+    payload:null,
+    //UI渲染后触发的回调函数
+    callback:null,
+    next:null
+  }
+}
+```
+
+FC用的Update数据结构：
+
+```js
+const update = {
+  lane,
+  action,
+  //优化策略相关字段
+  hasEagerState:false,
+  eagerState:null,
+  next:null
+}
+```
+
+
+
+# 错误处理
 
 React提供了两个与错误处理相关的API
 
-getDerivedStateFromError：静态方法，当错误发生时，提供一个机会渲染fallback UI
+- getDerivedStateFromError：静态方法，当错误发生时，提供一个机会渲染fallback UI
+- componentDidCatch：组件实例方法，当错误发生时，提供一个机会记录错误信息
 
-componentDidCatch：组件实例方法，当错误发生时，提供一个机会记录错误信息
+使用这两个API的ClassComponent通常被称为Error Boundaries（错误边界），在Error Boundaries的子孙组件中发生的所有React工作流程内(render阶段和commit阶段)的错误都会被Error Boundaries捕获
+
+## 不会被Error Boundaries捕获的错误
+
+根据官方文档，有四类错误不会被Error Boundaries捕获
+
+（1）事件回调中的错误（如点击触发handleClick抛出的错误）
+
+原因：事件回调不属于React工作流程(render阶段和commit阶段)
+
+（2）异步代码（如setTimeOut，requestAnimationFrame回调）
+
+原因：异步代码不属于React工作流程(render阶段和commit阶段)
+
+（3）Server side rendering
+
+原因：SSR不属于React工作流程(render阶段和commit阶段)
+
+（4）在Error Boundaries所属的Component内发生的错误
+
+原因：Error Boundaries只会捕获子孙组件发生的React工作流程内的错误
+
+## Error Boundaries捕获React工作流程内错误流程
+
+整体分为三个阶段：捕获错误、构造callback、执行callback
+
+（1）捕获错误：
+
+render阶段的错误会被捕获交给handleError(root,thrownValue)处理
+
+commit阶段的错误会被捕获交给captureCommitPhaseError(fiber,fiber.return,error)处理
+
+（2）构造callback
+
+无论是handleError还是captureCommitPhaseError，都会从发生错误的fiberNode的父fiberNode开始，逐层向上遍历，寻找最近的Error Boundaries。一旦找到就会执行createClassErrorUpdate方法，构造两个callback，一个是用于执行Error Boundaries API的callback，一个是用于抛出React提示信息的callback。
+
+如果没有找到Error Boundaries，则继续向上遍历直到HostRootFiber，并执行createRootErrorUpdate方法构造callback，在callbakc内抛出未捕获的错误
+
+（3）执行callback
+
+对于Error Boundaries，类似于触发了如下的更新
+
+```js
+this.setState(()=>{
+  //用于执行getDerivedStateFromError的callback
+},()=>{
+  //用于执行componentDidCatch的callback
+  //以及用于抛出React提示信息的callback
+})
+```
+
+对于HostRoot，类似于执行了如下代码
+
+```js
+ReactDOM.render(element,container,()=>{
+  //用于抛出未捕获的错误及React提示信息的callback
+})
+```
+
