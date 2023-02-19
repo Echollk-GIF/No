@@ -1036,3 +1036,111 @@ StringBuilder、StringBuffer的API是完全一致的，并且很多方法与Stri
 （6）String substring(int start, int end)：截取当前字符序列[start,end)
 （7）String toString()：返回此序列中数据的字符串表示形式
 （8）void setLength(int newLength) ：设置当前字符序列长度为newLength
+
+# 集合框架
+
+Java 集合可分为 Collection 和 Map 两大体系：
+
+- Collection接口：用于存储一个一个的数据，也称`单列数据集合`。
+
+  - List子接口：用来存储有序的、可以重复的数据（主要用来替换数组，"动态"数组）
+
+    - 实现类：ArrayList(主要实现类)、LinkedList、Vector
+
+  - Set子接口：用来存储无序的、不可重复的数据（类似于高中讲的"集合"）
+
+    ​		实现类：HashSet(主要实现类)、LinkedHashSet、TreeSet
+
+- Map接口：用于存储具有映射关系“key-value对”的集合，即一对一对的数据，也称`双列数据集合`。(类似于高中的函数、映射。(x1,y1),(x2,y2) ---> y = f(x) )
+
+  - HashMap(主要实现类)、LinkedHashMap、TreeMap、Hashtable、Properties
+
+## Collection接口及方法
+
+### 添加
+
+（1）add(E obj)：添加元素对象到当前集合中
+（2）addAll(Collection other)：添加other集合中的所有元素对象到当前集合中，即this = this ∪ other
+
+### 判断
+
+（3）int size()：获取当前集合中实际存储的元素个数
+（4）boolean isEmpty()：判断当前集合是否为空集合
+（5）boolean contains(Object obj)：判断当前集合中是否存在一个与obj对象equals返回true的元素
+（6）boolean containsAll(Collection coll)：判断coll集合中的元素是否在当前集合中都存在。即coll集合是否是当前集合的“子集”
+（7）boolean equals(Object obj)：判断当前集合与obj是否相等
+
+### 删除
+
+（8）void clear()：清空集合元素
+（9） boolean remove(Object obj) ：从当前集合中删除第一个找到的与obj对象equals返回true的元素。
+（10）boolean removeAll(Collection coll)：从当前集合中删除所有与coll集合中相同的元素。即this = this - this ∩ coll
+（11）boolean retainAll(Collection coll)：从当前集合中删除两个集合中不同的元素，使得当前集合仅保留与coll集合中的元素相同的元素，即当前集合中仅保留两个集合的交集，即this  = this ∩ coll；
+
+### 其它
+
+（12）Object[] toArray()：返回包含当前集合中所有元素的数组
+（13）hashCode()：获取集合对象的哈希值
+（14）iterator()：返回迭代器对象，用于集合遍历
+
+## Iterator(迭代器)接口
+
+- 在程序开发中，经常需要遍历集合中的所有元素。针对这种需求，JDK专门提供了一个接口`java.util.Iterator`。`Iterator`接口也是Java集合中的一员，但它与`Collection`、`Map`接口有所不同。
+  - Collection接口与Map接口主要用于`存储`元素
+  - `Iterator`，被称为迭代器接口，本身并不提供存储对象的能力，主要用于`遍历`Collection中的元素
+
+
+- Collection接口继承了java.lang.Iterable接口，该接口有一个iterator()方法，那么所有实现了Collection接口的集合类都有一个iterator()方法，用以返回一个实现了Iterator接口的对象。
+  - `public Iterator iterator()`: 获取集合对应的迭代器，用来遍历集合中的元素的。
+  - 集合对象每次调用iterator()方法都得到一个全新的迭代器对象，默认游标都在集合的第一个元素之前。
+
+- Iterator接口的常用方法如下：
+  - `public E next()`:返回迭代的下一个元素。
+  - `public boolean hasNext()`:如果仍有元素可以迭代，则返回 true。
+
+- 注意：在调用it.next()方法之前必须要调用it.hasNext()进行检测。若不调用，且下一条记录无效，直接调用it.next()会抛出`NoSuchElementException异常`。
+
+## Collection子接口1：List
+
+List除了从Collection集合继承的方法外，List 集合里添加了一些`根据索引`来操作集合元素的方法。
+
+- 插入元素
+  - `void add(int index, Object ele)`:在index位置插入ele元素
+  - boolean addAll(int index, Collection eles):从index位置开始将eles中的所有元素添加进来
+- 获取元素
+  - `Object get(int index)`:获取指定index位置的元素
+  - List subList(int fromIndex, int toIndex):返回从fromIndex到toIndex位置的子集合
+- 获取元素索引
+  - int indexOf(Object obj):返回obj在集合中首次出现的位置
+  - int lastIndexOf(Object obj):返回obj在当前集合中末次出现的位置
+- 删除和替换元素
+  - `Object remove(int index)`:移除指定index位置的元素，并返回此元素
+
+  - `Object set(int index, Object ele)`:设置指定index位置的元素为ele
+
+## Collection子接口2：Set
+
+- Set接口是Collection的子接口，Set接口相较于Collection接口没有提供额外的方法
+- Set 集合不允许包含相同的元素，如果试把两个相同的元素加入同一个 Set 集合中，则添加操作失败。
+- Set集合支持的遍历方式和Collection集合一样：foreach和Iterator。
+- Set的常用实现类有：HashSet、TreeSet、LinkedHashSet。
+
+## Map接口的常用方法
+
+- **添加、修改操作：**
+  - Object put(Object key,Object value)：将指定key-value添加到(或修改)当前map对象中
+  - void putAll(Map m):将m中的所有key-value对存放到当前map中
+- **删除操作：**
+  - Object remove(Object key)：移除指定key的key-value对，并返回value
+  - void clear()：清空当前map中的所有数据
+- **元素查询的操作：**
+  - Object get(Object key)：获取指定key对应的value
+  - boolean containsKey(Object key)：是否包含指定的key
+  - boolean containsValue(Object value)：是否包含指定的value
+  - int size()：返回map中key-value对的个数
+  - boolean isEmpty()：判断当前map是否为空
+  - boolean equals(Object obj)：判断当前map和参数对象obj是否相等
+- **元视图操作的方法：**
+  - Set keySet()：返回所有key构成的Set集合
+  - Collection values()：返回所有value构成的Collection集合
+  - Set entrySet()：返回所有key-value对构成的Set集合
