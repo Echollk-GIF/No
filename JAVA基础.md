@@ -997,3 +997,42 @@ public class CallableTest {
 （28）String replace(CharSequence target, CharSequence replacement)：使用指定的字面值替换序列替换此字符串所有匹配字面值目标序列的子字符串。 
 （29）String replaceAll(String regex, String replacement)：使用给定的 replacement 替换此字符串所有匹配给定的正则表达式的子字符串。 
 （30）String replaceFirst(String regex, String replacement)：使用给定的 replacement 替换此字符串匹配给定的正则表达式的第一个子字符串。 
+
+## StringBuffer与StringBuilder的理解
+
+java.lang.StringBuffer代表`可变的字符序列`，JDK1.0中声明，可以对字符串内容进行增删，此时不会产生新的对象
+
+- StringBuilder 和 StringBuffer 非常类似，均代表可变的字符序列，而且提供相关功能的方法也一样。
+- 区分String、StringBuffer、StringBuilder
+  - String:不可变的字符序列； 底层使用char[]数组存储(JDK8.0中)
+  - StringBuffer:可变的字符序列；线程安全（方法有synchronized修饰），效率低；底层使用char[]数组存储 (JDK8.0中)
+  - StringBuilder:可变的字符序列； jdk1.5引入，线程不安全的，效率高；底层使用char[]数组存储(JDK8.0中)
+
+### StringBuilder、StringBuffer的API
+
+StringBuilder、StringBuffer的API是完全一致的，并且很多方法与String相同。
+
+**1、常用API**
+
+（1）StringBuffer append(xx)：提供了很多的append()方法，用于进行字符串追加的方式拼接
+（2）StringBuffer delete(int start, int end)：删除[start,end)之间字符
+（3）StringBuffer deleteCharAt(int index)：删除[index]位置字符
+（4）StringBuffer replace(int start, int end, String str)：替换[start,end)范围的字符序列为str
+（5）void setCharAt(int index, char c)：替换[index]位置字符
+（6）char charAt(int index)：查找指定index位置上的字符
+（7）StringBuffer insert(int index, xx)：在[index]位置插入xx
+（8）int length()：返回存储的字符数据的长度
+（9）StringBuffer reverse()：反转
+
+> - 当append和insert时，如果原来value数组长度不够，可扩容。
+
+**2、其它API**
+
+（1）int indexOf(String str)：在当前字符序列中查询str的第一次出现下标
+（2）int indexOf(String str, int fromIndex)：在当前字符序列[fromIndex,最后]中查询str的第一次出现下标
+（3）int lastIndexOf(String str)：在当前字符序列中查询str的最后一次出现下标
+（4）int lastIndexOf(String str, int fromIndex)：在当前字符序列[fromIndex,最后]中查询str的最后一次出现下标
+（5）String substring(int start)：截取当前字符序列[start,最后]
+（6）String substring(int start, int end)：截取当前字符序列[start,end)
+（7）String toString()：返回此序列中数据的字符串表示形式
+（8）void setLength(int newLength) ：设置当前字符序列长度为newLength
