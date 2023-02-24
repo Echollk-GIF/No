@@ -8,6 +8,8 @@ RN没有div h1等普通HTML元素，常用View Text
 
 插件快捷命令:rnf(react native function)、rnfs(带StyleSheet)
 
+handle函数不要加()，否则会在渲染时自动执行
+
 # CSS
 
 RN中的样式与CSS的不同：没有继承性（RN中的继承只发生在Text组件上）、样式名采用小驼峰命名、所有尺寸都没有单位、有些特殊的样式名(marginHorizontal水平外边距、marginVertical垂直外边距)
@@ -78,7 +80,11 @@ marginVertical只设置上下margin
 
 ## Button && Alert
 
-button按钮文字要用title，onPress相当于之前的onClick
+总结：
+
+Button常用属性：title、onPress、color（注意不要以style定义button的颜色）
+
+Alert常用属性：Alert.alert() 可以再里面依次写警告标题、内容、以及N个按钮
 
 ```react
 import { View, StyleSheet, Button, Alert } from 'react-native'
@@ -164,12 +170,6 @@ const styles = StyleSheet.create({
   }
 })
 ```
-
-总结：
-
-Button常用属性：title、onPress、color（注意不要以style定义button的颜色）
-
-Alert常用属性：Alert.alert() 可以再里面依次写警告标题、内容、以及N个按钮
 
 ## StatusBar && Switch
 
@@ -288,6 +288,14 @@ Image常用属性：style、source(本地图片用require，线上图片用{uri:
 
 ## TextInput
 
+总结：
+
+TextInput常用属性要根据输入框类型，具体可以看示例
+
+TextInput一般需要有一个宽度才能显示
+
+常用属性：style、placeholder、value、onChangeText、secureTextEntry（密码）
+
 ```react
 import { StyleSheet, View, TextInput, Dimensions, Button } from 'react-native'
 import React, { useState } from 'react'
@@ -360,12 +368,6 @@ const styles = StyleSheet.create({
   }
 })
 ```
-
-总结：
-
-TextInput常用属性要根据输入框类型，具体可以看示例
-
-TextInput一般需要有一个宽度才能显示
 
 ## Touchable
 
@@ -591,6 +593,8 @@ export default App
 ```
 
 ## FastList
+
+不确定有多少或者列表很长用FastList，否则可以考虑用ScrollView
 
 ```react
 import React, { useState } from 'react'
