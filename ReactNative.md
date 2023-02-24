@@ -1,6 +1,10 @@
 [TOC]
 
-创建项目 react-native init myproject
+# Tips
+
+RN没有div h1等普通HTML元素，常用View Text
+
+创建项目 expo init myproject
 
 插件快捷命令:rnf(react native function)、rnfs(带StyleSheet)
 
@@ -73,6 +77,8 @@ marginVertical只设置上下margin
 # 核心组件
 
 ## Button && Alert
+
+button按钮文字要用title，onPress相当于之前的onClick
 
 ```react
 import { View, StyleSheet, Button, Alert } from 'react-native'
