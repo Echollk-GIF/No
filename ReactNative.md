@@ -594,7 +594,13 @@ export default App
 
 ## FastList
 
-不确定有多少或者列表很长用FastList，否则可以考虑用ScrollView
+ScrollView会简单粗暴地把所有子元素一次性全部渲染出来。
+
+FlatList会惰性渲染子元素，只在它们将要出现在屏幕中时开始渲染。
+
+此外FlatList还可以方便地渲染行间分隔线，支持多列布局，无限滚动加载等等。
+
+常用属性：data列表的数据源、renderItem则从数据源中逐个解析数据，然后返回一个设定好格式的组件来渲染。
 
 ```react
 import React, { useState } from 'react'
