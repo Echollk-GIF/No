@@ -16,7 +16,7 @@ RN中的样式与CSS的不同：没有继承性（RN中的继承只发生在Text
 
 ## StyleSheet
 
-可以通过在style属性中调用StyleSheet声明样式(个人觉得有点像scss)
+可以通过在style属性中调用StyleSheet声明样式
 
 ```react
 import { StyleSheet, Text, View } from 'react-native'
@@ -600,7 +600,11 @@ FlatList会惰性渲染子元素，只在它们将要出现在屏幕中时开始
 
 此外FlatList还可以方便地渲染行间分隔线，支持多列布局，无限滚动加载等等。
 
-常用属性：data列表的数据源、renderItem则从数据源中逐个解析数据，然后返回一个设定好格式的组件来渲染。
+常用属性：
+
+- data列表的数据源
+- renderItem则从数据源中逐个解析数据，然后返回一个设定好格式的组件来渲染
+- keyExtractor={item => item.id} 密钥提取器
 
 ```react
 import React, { useState } from 'react'
@@ -858,6 +862,12 @@ const styles = StyleSheet.create({
 
 export default App
 ```
+
+## KeyboardAvoidingView
+
+使软键盘不会覆盖输入
+
+常用属性：behavior（例如position适合ios、height、padding适合安卓）、keyboardVerticalOffset（软键盘输入时重新定位）
 
 # 第三方组件
 
