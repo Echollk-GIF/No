@@ -43,6 +43,8 @@ const styles = StyleSheet.create({
 
 Dimensions可以用来获取屏幕的尺寸
 
+这个属性只有初始化时会获取，旋转屏幕不会重新获取。可以通过Dimensions.addEventListener('change',updateLayout)方式，通过updateLauyout函数重新获取宽度和高度
+
 ```react
 import { StatusBar } from 'expo-status-bar'
 import { StyleSheet, Text, View, Dimensions } from 'react-native'
