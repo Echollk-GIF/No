@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
 
 Dimensions可以用来获取屏幕的尺寸
 
-这个属性只有初始化时会获取，旋转屏幕不会重新获取。可以通过Dimensions.addEventListener('change',updateLayout)方式，通过updateLauyout函数重新获取宽度和高度
+这个属性只有初始化时会获取，旋转屏幕不会重新获取。可以在useEffect中通过Dimensions.addEventListener('change',updateLayout)方式，通过updateLauyout函数重新获取宽度和高度，并在return中取消监听Dimensions.removeEventListener('change',updateLayout)
 
 ```react
 import { StatusBar } from 'expo-status-bar'
@@ -243,6 +243,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   }
 })
+
+//也可以设置baseStyle、IOSStyle、AndroidStyle,在style中设置
+style={{
+       ...styles.baseStyle,
+       ...Platform.select({
+       ios:styles.IOSStyle,
+       android:styles.AndroidStyle
+      })
+      }}
 ```
 
 总结：
