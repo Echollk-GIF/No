@@ -1085,39 +1085,39 @@ useEffect(()=>{
 
 # 路由
 
-React Native 项目中安装所需的包：
+## 3.X版本
 
-yarn add @react-navigation/native
+### 基础路由
 
-npx expo install react-native-screens react-native-safe-area-context
+```js
+npm install react-navigation
+//如果您使用的是 Expo，为确保获得您应该运行的库的兼容版本：
+npx expo install react-native-gesture-handler react-native-reanimated
+//否则，直接使用 yarn 或 npm 即可：
+npm install react-native-gesture-handler react-native-reanimated
+```
 
-## Stack
+```react
+//npm install --save react-navigation-stack
+import { createStackNavigator, createAppContainer } from 'react-navigation';
 
-yarn add @react-navigation/native-stack
+import CategoriesScreen from '../screens/CategoriesScreen';
+import CategoryMealsScreen from '../screens/CategoryMealsScreen';
+import MealDetailScreen from '../screens/MealDetailScreen';
 
-## Bottom Tabs
+const MealsNavigator = createStackNavigator({
+  Categories: CategoriesScreen,
+  CategoryMeals: {
+    screen: CategoryMealsScreen
+  },
+  MealDetail: MealDetailScreen
+});
 
-yarn add @react-navigation/material-bottom-tabs react-native-paper react-native-vector-icons
+export default createAppContainer(MealsNavigator);
+```
 
-## react-native-vector-icons
-
-图标组件库
-
-## DrawerNavigator
-
-抽屉导航
-
-## MaterialTopTab导航
-
-既支持点击也支持滑动切换导航
-
-## 路由传参
-
-传递参数：
-
-navigation.navigate('路由名称',{key:123})
-
-接收参数：
-
-解构出route，通过const  {key} =  route.params
+```react
+props.navigation.navigate({routeName:CategoryMeals})
+props.navigation.navigate('CategoryMeals')
+```
 
