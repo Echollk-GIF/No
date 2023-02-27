@@ -390,6 +390,8 @@ TouchableOpacity 触碰后，透明度降低（模糊显示）
 
 TouchableWithoutFeedback 触碰后，无任何相应
 
+TouchableNativeFeedback（安卓系统且Platfrom.Version>=21）
+
 ```react
 import {
   StyleSheet, View, Text,
@@ -615,7 +617,8 @@ FlatList会惰性渲染子元素，只在它们将要出现在屏幕中时开始
 
 - data列表的数据源
 - renderItem则从数据源中逐个解析数据，然后返回一个设定好格式的组件来渲染
-- keyExtractor={item => item.id} 密钥提取器
+- keyExtractor={item => item.id} 密钥提取器（旧版本需要这样做）
+- numColumns={2} 指定列数
 
 ```react
 import React, { useState } from 'react'
@@ -1108,16 +1111,76 @@ import MealDetailScreen from '../screens/MealDetailScreen';
 const MealsNavigator = createStackNavigator({
   Categories: CategoriesScreen,
   CategoryMeals: {
-    screen: CategoryMealsScreen
+    screen: CategoryMealsScreen，
   },
   MealDetail: MealDetailScreen
+},{
+  defaultNavigationOptions:{
+      headerStyle:{
+    		backgroundColor:'black'
+  		},
+  		headerTintColor:'white'
+  }
 });
 
 export default createAppContainer(MealsNavigator);
 ```
 
+导航方式
+
 ```react
-props.navigation.navigate({routeName:CategoryMeals})
-props.navigation.navigate('CategoryMeals')
+props.navigation.navigate({routeName:'CategoryMeals'},params:{categoryId:'1'})
+props.navigation.navigate('CategoryMeals',{categoryId:'1'})
+//在目标页面中以const id = props.navigation.getParam('categoryId')的形式获取或者
+CategoriesScreen.navigationOptions = navigationData =>{
+  const id = navigationData.navigation.getParam('categoryId')
+  const selectedCategory = CATEGORIES.find(cat=>cat.id === catId);
+  return {
+    headerTitle:selectedCategory.title
+  }
+}
+
+props.navigation.push('CategoryMeals')//push可以重复进入同一路由页面
+props.navigation.goBack();
+props.navigation.pop();//pop只有在堆栈导航器中能用,goBack也可以在其他导航器中使用
+props.navigation.popToTop();
 ```
 
+标题
+
+```js
+//CategoriesScreen.js
+CategoriesScreen.navigationOptions = {
+	headerTitle:'Meal Categories',
+  headerStyle:{
+    backgroundColor:'black'
+  },
+  headerTintColor:'white'
+}
+```
+
+底部导航器
+
+createBottomTabNavigator
+
+```react
+tabBarOptions: {
+  activeTintColor: '#e91e63',
+  labelStyle: {
+    fontSize: 12,
+  },
+  style: {
+    backgroundColor: 'blue',
+  },
+}
+const MealsFavTabNavigator = createBottomTabNavigator({
+  Meals:mealsNavigator,
+  Favorites:FavoritesScreen
+},{
+  tabBarOptions:tabBarOptions
+})
+```
+
+抽屉导航器
+
+createDrawerNavigator
