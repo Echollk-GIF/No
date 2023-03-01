@@ -10,6 +10,21 @@ RN没有div h1等普通HTML元素，常用View Text
 
 handle函数不要加()，否则会在渲染时自动执行
 
+# 创建项目
+
+```js
+//expo
+npm install -g expo-cli
+expo init projectName
+npm start
+
+//native
+brew install watchman
+react-native init projectName
+```
+
+
+
 # CSS
 
 RN中的样式与CSS的不同：没有继承性（RN中的继承只发生在Text组件上）、样式名采用小驼峰命名、所有尺寸都没有单位、有些特殊的样式名(marginHorizontal水平外边距、marginVertical垂直外边距)
@@ -1184,3 +1199,18 @@ const MealsFavTabNavigator = createBottomTabNavigator({
 抽屉导航器
 
 createDrawerNavigator
+
+## 5.X版本
+
+```react
+import {NavigationContainer} from '@react-navigation/native'
+import {createStackNavigator} from '@react-navigation/stack'
+const Mystack = createStackNavigator()//注意这里不再像之前版本一样传入配置项
+return (
+  <NavigationContainer>
+    <Mystack.navigator>
+    </Mystack.navigator>
+  </NavigationContainer>
+)
+```
+
