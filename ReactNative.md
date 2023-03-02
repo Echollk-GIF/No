@@ -85,13 +85,33 @@ const styles = StyleSheet.create({
 
 ## Flex
 
+**容器属性**
+
 flexDirection：RN里flex的默认方向是从上到下即'colume'，Web CSS中默认为row
 
-alignItems:RN里默认为stretch，Web CSS中默认为flex-start
+alignItems:RN里默认为stretch(弹性元素被在侧轴方向被拉伸到与容器相同的高度或宽度)，Web CSS中默认为flex-start
 
 flex:相比Web CSS的flex接受多参数，如flex:2 2 10%，RN中flex只接受一个参数
 
 RN中的flex不支持align-content、flex-basis、order、flex-grow、flex-flow、flex-shrink
+
+flexWrap:默认nowrap、wrap
+
+**子视图属性**
+
+alignSelf：定义对齐方式（注意：该属性可重写容器属性的alignItems属性），默认为auto（继承父元素的align-items属性，如果没有父容器则为stretch，stretch元素被拉伸以适应容器、center元素中心、flex-start位于容器开头、flex-end位于容器结尾）
+
+flex:定义可伸缩元素的能力，默认为0
+
+**flex其他属性**
+
+borderBottom(RIght、Top、Left)Width 底部、右边、顶部、左边的边框高度
+
+borderWidth 边框高度
+
+marginVertical上下外边距
+
+marginHorizontal左右外边距
 
 ## Margin
 
