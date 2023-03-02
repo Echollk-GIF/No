@@ -23,11 +23,9 @@ brew install watchman
 react-native init projectName
 ```
 
-
-
 # CSS
 
-RN中的样式与CSS的不同：没有继承性（RN中的继承只发生在Text组件上）、样式名采用小驼峰命名、所有尺寸都没有单位、有些特殊的样式名(marginHorizontal水平外边距、marginVertical垂直外边距)
+RN中的样式与CSS的不同：没有继承性（RN中的继承只发生在Text组件上）、样式名采用小驼峰命名、所有尺寸都没有单位（在安卓上字体解释为单位为sp、在ios上字体被解释为pt）、有些特殊的样式名(marginHorizontal水平外边距、marginVertical垂直外边距)
 
 ## StyleSheet
 
@@ -87,7 +85,13 @@ const styles = StyleSheet.create({
 
 ## Flex
 
-注意rn里flex的默认方向是从上到下，如果要水平需要设置flexDirection: 'row' 
+flexDirection：RN里flex的默认方向是从上到下即'colume'，Web CSS中默认为row
+
+alignItems:RN里默认为stretch，Web CSS中默认为flex-start
+
+flex:相比Web CSS的flex接受多参数，如flex:2 2 10%，RN中flex只接受一个参数
+
+RN中的flex不支持align-content、flex-basis、order、flex-grow、flex-flow、flex-shrink
 
 ## Margin
 
