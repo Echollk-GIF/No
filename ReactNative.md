@@ -1226,15 +1226,63 @@ createDrawerNavigator
 
 ## 5.X版本
 
+### 非expo版本
+
+```js
+npm install @react-navigation/native@^5.x//核心包
+npm install react-native-reanimated react-native-gesture-handler react-native-screens react-native-safe-area-context @react-native-community/masked-view
+//动画库 手势库  实现安卓和ios的原生组件 异形屏适配 堆栈式导航器依赖的库（不会显示使用）
+```
+
+#### 堆栈式导航器
+
+```
+npm install @react-navigation/stack@^5.x
+```
+
 ```react
-import {NavigationContainer} from '@react-navigation/native'
-import {createStackNavigator} from '@react-navigation/stack'
-const Mystack = createStackNavigator()//注意这里不再像之前版本一样传入配置项
-return (
-  <NavigationContainer>
-    <Mystack.navigator>
-    </Mystack.navigator>
-  </NavigationContainer>
-)
+import { NavigationContainer } from '@react-navigation/native';//所有导航器都要放在这个NavigationContainer中
+import { createStackNavigator } from '@react-navigation/stack';//引入堆栈导航器
+//createStackNavigator会返回一个对象包含两个属性，Navigator组件和Screen组件
+
+class Navigator extends React.Component{
+  render(){
+    return(
+      <NavigationContainer>
+        <Stack.Navigator 
+          screenOptions={{
+            headerTitleAlign:'center'，
+            headerTitle：'首页',
+            headerStyleInterpolator:headerStyleInterpolators.forUIKit
+            cardStyleInInterpolator:cardStyleInInterpolators.forHorizontalIOS
+            gestureEnabled:true//开启安卓端的手势系统
+            gestureDirection:'horizontal'//手势方向
+            headerStyle:{
+              ...Platform.select({
+                android:{
+                  elevation:0,
+                  borderBottomWidth:StyleSheet.hairlineWidth
+                },
+                ios:{}
+              })
+            }
+          }}
+          headerMode="float"
+          >
+          <Stack.Screen name="Home" component={Home} options={{headerTitleAlign:'left'}}/>
+          //在Screen中设置options的优先级比Navigator中要高
+          <Stack.Screen name="Detail" component={Detail}/>
+        </Stack.Navigator>
+      </NavigationContainer>
+    )
+  }
+}
+
+//跳转路由传参
+props.navigation.navigate("home",{
+  id:100
+})
+//接受参数（类组件）
+this.props.route.params.id
 ```
 
