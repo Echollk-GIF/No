@@ -1286,3 +1286,42 @@ props.navigation.navigate("home",{
 this.props.route.params.id
 ```
 
+#### 标签导航器
+
+```
+yarn add @react-navigation/bottom-tabs
+```
+
+```react
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+const Tab = createBottomTabNavigator()
+class BottomTabs extends React.Component{
+  render(){
+    return(
+      <NavigationContainer>
+        <Tab.Navigator tabBarOptions={{
+            activeTintColor:'#ffffff'
+          }}>
+          <Tab.Screen 
+            name="Home"
+            component={Home}
+            options={{
+              tabBarLabel:'首页',
+              tabBarIcon:({color,size})=><Icon name="xx" size={size} color={color}></Icon>
+            }}
+            />
+          <Tab.Screen name="Detail" component={Detail}/>
+        </Tab.Navigator>
+      </NavigationContainer>
+    )
+  }
+}
+
+const {navigation} = this.props;
+navigation.setOptions({
+  headerTitle:'我听'
+})
+```
+
