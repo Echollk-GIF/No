@@ -1325,3 +1325,49 @@ navigation.setOptions({
 })
 ```
 
+#### 顶部标签导航器
+
+```js
+yarn add @react-navigation/material-top-tab react-native-tab-view
+```
+
+```react
+import { NavigationContainer } from '@react-navigation/native';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tab';
+
+const Tab = createMaterialTopTabNavigator()
+class TopTabs extends React.Component{
+  render(){
+    return(
+      <NavigationContainer>
+        <Tab.Navigator
+          lazy={true}
+          tabBarOptions={{
+            scrollEnabled:true//滑动还是均分
+            tabStyle:{
+              width:80,
+            },
+            indicatorStyle:{
+              height:4,
+              width:20,
+              marginLeft:30,
+              borderRadius:2,
+              backfroundColor:'#f86442'
+            }
+          }}>
+          <Tab.Screen 
+            name="Home"
+            component={Home}
+            options={{
+              tabBarLabel:'首页',
+              tabBarIcon:({color,size})=><Icon name="xx" size={size} color={color}></Icon>
+            }}
+            />
+          <Tab.Screen name="Detail" component={Detail}/>
+        </Tab.Navigator>
+      </NavigationContainer>
+    )
+  }
+}
+```
+
