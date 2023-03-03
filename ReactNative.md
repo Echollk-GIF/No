@@ -119,6 +119,12 @@ marginVertical只设置上下margin
 
 # 核心组件
 
+## Text
+
+属性：
+
+numberOfLines最多显示几行
+
 ## Button && Alert
 
 总结：
@@ -1158,7 +1164,7 @@ export class MyCarousel extends Component {
 }
 ```
 
-
+## 图标(react-native-vector-icons)
 
 # 路由
 
