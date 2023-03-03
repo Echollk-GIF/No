@@ -969,7 +969,7 @@ return <Picker
 </Picker>
 ```
 
-## react-native-swiper
+## 轮播图(react-native-swiper)
 
 ```react
 import React, { Component } from 'react'
@@ -1125,6 +1125,41 @@ useEffect(()=>{
 
 ```
 
+## 轮播图(react-native-snap-carousel)
+
+```
+yarn add react-native-snap-carousel
+```
+
+```react
+import Carousel from 'react-native-snap-carousel';
+
+export class MyCarousel extends Component {
+
+    _renderItem = ({item, index}) => {
+        return (
+            <View style={styles.slide}>
+                <Text style={styles.title}>{ item.title }</Text>
+            </View>
+        );
+    }
+
+    render () {
+        return (
+            <Carousel
+              ref={(c) => { this._carousel = c; }}
+              data={this.state.entries}
+              renderItem={this._renderItem}
+              sliderWidth={sliderWidth}
+              itemWidth={itemWidth}
+            />
+        );
+    }
+}
+```
+
+
+
 # 路由
 
 ## 3.X版本
@@ -1257,6 +1292,7 @@ class Navigator extends React.Component{
             cardStyleInInterpolator:cardStyleInInterpolators.forHorizontalIOS
             gestureEnabled:true//开启安卓端的手势系统
             gestureDirection:'horizontal'//手势方向
+            headerStatusBarHeight:StatusBar.currentHeight
             headerStyle:{
               ...Platform.select({
                 android:{
