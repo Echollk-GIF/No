@@ -23,6 +23,19 @@ brew install watchman
 react-native init projectName
 ```
 
+# 调试
+
+想要查看网络请求
+
+1. 找到项目的入口文件 `index.js`
+
+2. 加入以下代码即可
+
+   ```js
+   GLOBAL.XMLHttpRequest = GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest
+   ```
+
+
 # CSS
 
 RN中的样式与CSS的不同：没有继承性（RN中的继承只发生在Text组件上）、样式名采用小驼峰命名、所有尺寸都没有单位（在安卓上字体解释为单位为sp、在ios上字体被解释为pt）、有些特殊的样式名(marginHorizontal水平外边距、marginVertical垂直外边距)
