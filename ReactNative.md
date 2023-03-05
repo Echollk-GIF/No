@@ -325,8 +325,10 @@ export default function App () {
     <View style={styles.container}>
       <Text>App</Text>
       <Image style={styles.itemImage}
+        //本地图片
         source={require('./assets/favicon.png')}></Image>
       <Image source={{
+        //网络图片
         uri: 'http://www.xxx.com/logo.png'
       }}></Image>
     </View>
@@ -350,6 +352,16 @@ const styles = StyleSheet.create({
 总结：
 
 Image常用属性：style、source(本地图片用require，线上图片用{uri:xxxx})
+
+## ImageBackGround
+
+> 一个可以使用图片当作背景的容器,相当于以前的 `div+背景图片`
+
+```jsx
+  <ImageBackground source={...} style={{width: '100%', height: '100%'}}>
+    <Text>Inside</Text>
+  </ImageBackground>
+```
 
 ## TextInput
 
@@ -465,6 +477,7 @@ export default function App () {
         </View>
       </TouchableHighlight>
       <TouchableOpacity
+        activeOpacity={0.5}
         onPress={() => console.log('触碰透明度变化')}>
         <View style={styles.item}>
           <Text>触碰透明度变化</Text>
