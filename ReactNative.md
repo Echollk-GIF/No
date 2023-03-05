@@ -52,6 +52,15 @@ const styles = StyleSheet.create({
 })
 ```
 
+## 变换
+
+```react
+<Text style={{transform:[
+    {translateY:300},
+    {scale:3}
+  ]}}></Text>
+```
+
 ## Dimensions
 
 Dimensions可以用来获取屏幕的尺寸
@@ -664,6 +673,8 @@ FlatList会惰性渲染子元素，只在它们将要出现在屏幕中时开始
 - renderItem则从数据源中逐个解析数据，然后返回一个设定好格式的组件来渲染
 - keyExtractor={item => item.id} 密钥提取器（旧版本需要这样做）
 - numColumns={2} 指定列数
+- onEndReached={()=>{}}当加载到底部时触发回调
+- onEndReachedThreshold={0.2}具体底部多远触发上面的回调
 
 ```react
 import React, { useState } from 'react'
