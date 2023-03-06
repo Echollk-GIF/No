@@ -252,7 +252,12 @@ export default function App () {
     <View style={[styles.container]}>
       <StatusBar
         hidden={hideStatus}
-        barStyle={'dark-content'} />
+        barStyle={'dark-content'}
+        
+        //实现图片覆盖状态栏
+        backgroundColor=“transparent”
+        translucent={true}
+        />
       <Switch
         trackColor={{ false: 'red', true: 'green' }}
         thumbColor={'blue'}
@@ -966,6 +971,641 @@ export default App
 常用属性：behavior（例如position适合ios、height、padding适合安卓）、keyboardVerticalOffset（软键盘输入时重新定位）
 
 # 第三方组件
+
+[TOC]
+
+
+
+## [react-navigation页面跳转和转场动画](https://www.npmjs.com/package/react-navigation)
+
+> 页面跳转和转场动画
+
+1. 安装
+
+   ```js
+   yarn add react-native-reanimated react-native-gesture-handler react-native-screens react-native-safe-area-context @react-native-community/masked-view  @react-navigation/stack @react-navigation/native
+   ```
+
+2. 代码
+
+   ```react
+   import * as React from 'react';
+   import { Button, View, Text } from 'react-native';
+   import { NavigationContainer } from '@react-navigation/native';
+   import { createStackNavigator } from '@react-navigation/stack';
+   
+   function HomeScreen({ navigation }) {
+     return (
+       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+         <Text>Home Screen</Text>
+         <Button
+           title="Go to Details"
+           onPress={() => navigation.navigate('Details')}
+         />
+       </View>
+     );
+   }
+   
+   function DetailsScreen() {
+     return (
+       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+         <Text>Details Screen</Text>
+       </View>
+     );
+   }
+   
+   const Stack = createStackNavigator();
+   
+   function App() {
+     return (
+       <NavigationContainer>
+         <Stack.Navigator HeaderMode="none" initialRouteName="Home">
+           <Stack.Screen name="Home" component={HomeScreen} />
+           <Stack.Screen name="Details" component={DetailsScreen} />
+         </Stack.Navigator>
+       </NavigationContainer>
+     );
+   }
+   
+   export default App;
+   
+   ```
+
+**其他**
+
+1. 跳转页面
+
+   [类组件](https://reactnavigation.org/docs/navigation-context)
+
+   ```jsx
+   import { NavigationContext } from '@react-navigation/native';
+   
+   class SomeComponent extends React.Component {
+     static contextType = NavigationContext;
+   
+     render() {
+       // We can access navigation object via context
+       const navigation = this.context;
+     }
+   }
+   ```
+
+   函数组件
+
+   ```jsx
+   import * as React from 'react';
+   import { Button } from 'react-native';
+   import { useNavigation } from '@react-navigation/native';
+   function MyBackButton() {
+     const navigation = useNavigation();
+     return (
+       <Button
+         title="Back"
+         onPress={() => {
+           navigation.goBack();
+         }}
+       />
+     );
+   }
+   ```
+
+## [react-native-svg-uri rn中使用svg技术](https://www.npmjs.com/package/react-native-svg-uri)
+
+> rn中使用svg技术
+
+1. 下载
+
+   ```js
+   yarn  add  react-native-svg-uri react-native-svg
+   ```
+
+2. 代码
+
+   ```jsx
+   import React, { Component } from 'react';
+   import { View, Text } from 'react-native';
+   import SvgUri from 'react-native-svg-uri';
+   class Index extends Component {
+     render() {
+       return (
+         <View>
+           <SvgUri width="23" height="23" svgXmlData={'<svg t="1568188030646"  viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7085" width="64" height="64"><path d="M515.3 597.2c-72.6 0-140.8-28.3-192.2-79.6-51.3-51.3-79.6-119.6-79.6-192.2s28.3-140.8 79.6-192.2 119.6-79.6 192.2-79.6 140.8 28.3 192.2 79.6 79.6 119.6 79.6 192.2-28.3 140.8-79.6 192.2c-51.4 51.3-119.6 79.6-192.2 79.6z m0-503.5c-61.9 0-120.1 24.1-163.9 67.9s-67.9 102-67.9 163.9 24.1 120.1 67.9 163.9c43.8 43.8 102 67.9 163.9 67.9 61.9 0 120.1-24.1 163.9-67.9 43.8-43.8 67.9-102 67.9-163.9 0-61.9-24.1-120.1-67.9-163.9-43.8-43.8-102-67.9-163.9-67.9zM994.9 915.6H62.3l3.8-23.3c12.4-75 51.3-143.9 109.6-194 59-50.6 134-78.5 211.3-78.5h283.1c77.3 0 152.3 27.9 211.3 78.5 58.3 50 97.2 118.9 109.6 194l3.9 23.3z m-884.4-40h836.2c-14.4-56.7-46.2-108.2-91.3-146.9-51.7-44.3-117.5-68.7-185.2-68.7H387c-67.7 0-133.5 24.4-185.2 68.8-45.1 38.7-77 90.2-91.3 146.8z" p-id="7086" fill="#999999"></path><path d="M448.1 640L513 841l80-201zM437.7 345c-12.1 0-21.9-9.9-21.9-21.9V269c0-12.1 9.9-21.9 21.9-21.9 12.1 0 21.9 9.9 21.9 21.9v54.1c0.1 12-9.8 21.9-21.9 21.9zM573.2 345c-12.1 0-21.9-9.9-21.9-21.9V269c0-12.1 9.9-21.9 21.9-21.9 12.1 0 21.9 9.9 21.9 21.9v54.1c0.1 12-9.8 21.9-21.9 21.9z" p-id="7087" fill="#999999" ></path></svg>'} />
+         </View>
+       );
+     }
+   }
+   export default Index;
+   ```
+
+   
+
+## [react-native-tab-navigator底部导航栏](https://www.npmjs.com/package/react-native-tab-navigator)
+
+> 底部导航栏
+
+1. 下载
+
+   ```js
+   yarn add react-native-tab-navigator
+   ```
+
+2. 代码
+
+   要有 SvgUri 和 Friend 等其他依赖
+
+   ```jsx
+   import React, { Component } from 'react';
+   import { View, Text,StyleSheet } from 'react-native';
+   import SvgUri from 'react-native-svg-uri';
+   import Friend from "./pages/friend";
+   import Group from "./pages/group";
+   import Message from "./pages/message";
+   import My from "./pages/my";
+   import TabNavigator from 'react-native-tab-navigator';
+   import SvgData from "./res/svg";
+   const dataSource = [
+     {
+       icon: SvgData.friend,
+       selectedIcon: SvgData.selectdFriend,
+       tabPage: 'Friend',
+       tabName: '交友',
+       badge: 0,
+       component: Friend
+     },
+     {
+       icon: SvgData.group,
+       selectedIcon:  SvgData.selectdGroup,
+       tabPage: 'Group',
+       tabName: '圈子',
+       badge: 0,
+       component: Group
+     },
+     {
+       icon: SvgData.message,
+       selectedIcon:SvgData.selectdMessage,
+       tabPage: 'Message',
+       tabName: '消息',
+       badge: 5,
+       component: Message
+     },
+     {
+       icon: SvgData.my,
+       selectedIcon: SvgData.selectdMy,
+       tabPage: 'My',
+       tabName: '我的',
+       badge: 0,
+       component: My
+     }
+   
+   ];
+   
+   class Index extends Component {
+     state = {
+       selectedTab: "Friend"
+     }
+     render() {
+       return (
+         <View style={{ flex: 1, backgroundColor: '#F5FCFF' }}>
+           <TabNavigator   >
+             {dataSource.map((v, i) => {
+               return (
+                 <TabNavigator.Item
+                   key={i}
+                   selected={this.state.selectedTab === v.tabPage}
+                   title={v.tabName}
+                   tabStyle={stylesheet.tab}
+                   titleStyle={{ color: '#999999' }}
+                   selectedTitleStyle={{ color: '#c863b5' }}
+                   renderIcon={() => <SvgUri width="23" height="23" svgXmlData={v.icon} />}
+                   renderSelectedIcon={() => <SvgUri width="23" height="23" svgXmlData={v.selectedIcon} />}
+                   badgeText={v.badge}
+                   onPress={() => this.setState({ selectedTab: v.tabPage })}>
+                   <v.component  />
+                 </TabNavigator.Item>
+               )
+             })}
+           </TabNavigator>
+         </View>
+       )
+     }
+   }
+   const stylesheet = StyleSheet.create({
+     tab: {
+       justifyContent: "center"
+     },
+     tabIcon: {
+       color: "#999",
+       width: 23,
+       height: 23
+     }
+   })
+   export default Index;
+   ```
+
+
+
+
+
+
+## [react-native-elementui库](https://react-native-elements.github.io/react-native-elements/docs/getting_started.html)
+
+> 一套ui库 内置常用组件
+
+1. 下载
+
+   需要使用到图标 因此也需要安装 `react-native-vector-icons`
+
+   ```js
+   yarn add react-native-elements react-native-vector-icons
+   ```
+
+2. 引入和使用
+
+   ```jsx
+   import { Icon } from 'react-native-elements'
+   
+   <Icon
+     name='rowing' />
+   ```
+
+3. [react-native-vector-icons](https://github.com/oblador/react-native-vector-icons) 的其他使用
+
+   1. 编辑 `android/app/build.gradle` 
+
+   2. 添加以下配置
+
+      ```jsx
+      project.ext.vectoricons = [
+          iconFontNames: [ 'MaterialIcons.ttf', 'EvilIcons.ttf' ] // Name of the font files you want to copy
+      ]
+      
+      apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+      ```
+
+   3. 重启项目
+
+   4. 添加代码 如
+
+      ```jsx
+      import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+      
+      const icon = <FontAwesome5 name={'comments'} />;
+      ```
+
+
+
+## [react-native-linear-gradient](https://www.npmjs.com/package/react-native-linear-gradient)
+
+> 渐变容器
+
+1. 下载
+
+   ```js
+   yarn add react-native-linear-gradient
+   ```
+
+2. 简单使用
+
+   ```jsx
+   import LinearGradient from 'react-native-linear-gradient';
+    
+   <LinearGradient colors={['#4c669f', '#3b5998', '#192f6a']} style={styles.linearGradient}>
+     <Text style={styles.buttonText}>
+       Sign in with Facebook
+     </Text>
+   </LinearGradient>
+   
+   var styles = StyleSheet.create({
+     linearGradient: {
+       flex: 1,
+       paddingLeft: 15,
+       paddingRight: 15,
+       borderRadius: 5
+     },
+     buttonText: {
+       fontSize: 18,
+       fontFamily: 'Gill Sans',
+       textAlign: 'center',
+       margin: 10,
+       color: '#ffffff',
+       backgroundColor: 'transparent',
+     },
+   });
+   ```
+
+
+
+
+
+## [react-native-confirmation-code-field验证码输入框](https://www.npmjs.com/package/react-native-confirmation-code-field)
+
+> 验证码输入框
+
+1. 下载
+
+   ```js
+   yarn add react-native-confirmation-code-field
+   ```
+
+2. 代码
+
+   ```jsx
+   import React, {useState} from 'react';
+   import {SafeAreaView, Text, StyleSheet} from 'react-native';
+    
+   import {
+     CodeField,
+     Cursor,
+     useBlurOnFulfill,
+     useClearByFocusCell,
+   } from 'react-native-confirmation-code-field';
+    
+   const styles = StyleSheet.create({
+     root: {flex: 1, padding: 20},
+     title: {textAlign: 'center', fontSize: 30},
+     codeFiledRoot: {marginTop: 20},
+     cell: {
+       width: 40,
+       height: 40,
+       lineHeight: 38,
+       fontSize: 24,
+       borderWidth: 2,
+       borderColor: '#00000030',
+       textAlign: 'center',
+     },
+     focusCell: {
+       borderColor: '#000',
+     },
+   });
+    
+   const CELL_COUNT = 6;
+    
+   const App = () => {
+     const [value, setValue] = useState('');
+     const ref = useBlurOnFulfill({value, cellCount: CELL_COUNT});
+     const [props, getCellOnLayoutHandler] = useClearByFocusCell({
+       value,
+       setValue,
+     });
+    
+     return (
+       <SafeAreaView style={styles.root}>
+         <Text style={styles.title}>Verification</Text>
+         <CodeField
+           ref={ref}
+           {...props}
+           value={value}
+           onChangeText={setValue}
+           cellCount={CELL_COUNT}
+           rootStyle={styles.codeFiledRoot}
+           keyboardType="number-pad"
+           textContentType="oneTimeCode"
+           renderCell={({index, symbol, isFocused}) => (
+             <Text
+               key={index}
+               style={[styles.cell, isFocused && styles.focusCell]}
+               onLayout={getCellOnLayoutHandler(index)}>
+               {symbol || (isFocused ? <Cursor /> : null)}
+             </Text>
+           )}
+         />
+       </SafeAreaView>
+     );
+   };
+    
+   export default App;
+   ```
+
+
+## svg
+
+> 因为在rn中 使用普通的字体图标是没有多种颜色的
+
+1. 下载依赖
+
+   ```js
+   yarn add react-native-svg react-native-svg-uri
+   ```
+
+2. 复制 示例demo中svg源代码
+
+3. 代码中使用
+
+   ```jsx
+   import SvgUri from 'react-native-svg-uri';
+   const female='<svg ......';
+   
+    <SvgUri width="23" height="23" svgXmlData={female} />
+   ```
+
+
+## iconfont字体图标
+
+1. 在字体图标网站上下载 字体 
+
+2. 然后拷贝 ttf后缀的文件到 `android\app\src\main\assets\fonts`中  如果没有`assets`文件夹可以新建一个
+
+3. 然后 给 `Text` 标签 设置
+
+   ```jsx
+    <Text style={{ fontFamily: "iconfont", color: "red" }} >{'\ue82b'}</Text>
+   ```
+
+4. 然后记得重启项目
+
+##  [react-native-datepicker日期选择框](https://www.npmjs.com/package/react-native-datepicker)
+
+> 日期选择框
+
+1. 安装
+
+   ```js
+   yarn add  react-native-datepicker 
+   ```
+
+2. 引入
+
+   ```js
+   import DatePicker from 'react-native-datepicker';
+   ```
+
+3. 使用
+
+   ```react
+    <DatePicker
+                 style={{ width: Styleskits.screen.width - 50 }} 
+                 mode="date"
+                 placeholder="设置生日"
+                 format="YYYY-MM-DD"
+                 confirmBtnText="Confirm"
+                 cancelBtnText="Cancel"
+                 iconComponent={<Icon name="angle-down"   />}
+                 androidMode="spinner"
+                 customStyles={{
+                   dateInput: {
+                     borderWidth: 0,
+                     borderBottomWidth: 1.1,
+                     alignItems:"flex-start",
+                     paddingLeft:6,
+                     textAlign:"left"
+                   },
+                   placeholderText:{
+                     fontSize:18,
+                     color:"#afafaf"
+                   }
+                 }}
+                 onDateChange={(date) => { this.setState({ birthday: date }) }}
+        />
+   ```
+
+
+
+
+## [react-native-amap-geolocation高德地图](https://github.com/qiuxiang/react-native-amap-geolocation)
+
+> 高德地图组件
+>
+> 分别使用了两个功能，一个是AndroidSDK和一个web服务
+
+1. [申请 高度地图的key](https://lbs.amap.com/api/android-location-sdk/guide/create-project/get-key)
+
+2. 下载依赖
+
+   ```js
+   yarn add  react-native-amap-geolocation
+   ```
+
+3. 配置文件
+
+   1. 编辑 `android/settings.gradle`，设置项目路径：
+
+      ```diff
+      + include ':react-native-amap-geolocation'
+      + project(':react-native-amap-geolocation').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-amap-geolocation/lib/android')
+      ```
+
+   2. 编辑 `android/app/build.gradle`，新增依赖：
+
+      ```diff
+      dependencies {
+      +   implementation project(':react-native-amap-geolocation')
+      }
+      ```
+
+   3. 编辑 `MainApplication.java`：
+
+      ```diff
+      + import cn.qiuxiang.react.geolocation.AMapGeolocationPackage;
+      
+      public class MainApplication extends Application implements ReactApplication {
+        @Override
+              protected List<ReactPackage> getPackages() {
+                @SuppressWarnings("UnnecessaryLocalVariable")
+                List<ReactPackage> packages = new PackageList(this).getPackages();
+                // Packages that cannot be autolinked yet can be added manually here, for example:
+      +         packages.add(new AMapGeolocationPackage());
+                return packages;
+              }
+      }
+      ```
+
+4. 代码
+
+   ```js
+   import { PermissionsAndroid, Platform } from "react-native";
+   import { init, Geolocation } from "react-native-amap-geolocation";
+   import axios from "axios";
+   class Geo {
+     async initGeo() {
+       if (Platform.OS === "android") {
+         await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION);
+       }
+       await init({
+         ios: "e8b092f4b23cef186bd1c4fdd975bf38",
+         android: "e8b092f4b23cef186bd1c4fdd975bf38"
+       });
+       return Promise.resolve();
+     }
+     async getCurrentPosition() {
+       return new Promise((resolve, reject) => {
+         console.log("开始定位");
+         Geolocation.getCurrentPosition(({ coords }) => {
+           resolve(coords);
+         }, reject);
+       })
+     }
+     async getCityByLocation() {
+       const { longitude, latitude } = await this.getCurrentPosition();
+       const res = await axios.get("https://restapi.amap.com/v3/geocode/regeo", {
+         params: { location: `${longitude},${latitude}`, key: "83e9dd6dfc3ad5925fc228c14eb3b4d6", }
+       });
+       return Promise.resolve(res.data);
+     }
+   }
+   
+   
+   export default new Geo();
+   ```
+
+##  [react-native-picker自定义picker](https://www.npmjs.com/package/react-native-picker)
+
+> 自定义picker
+
+1. 安装
+
+   ```
+   yarn add react-native-picker
+   ```
+
+2. 代码
+
+   ```react
+   import Picker from 'react-native-picker';
+       Picker.init({
+         pickerData: CityJson,
+         selectedValue: ["北京", "北京"],
+         wheelFlex: [1, 1, 0], // 显示省和市
+         pickerConfirmBtnText: "确定",
+         pickerCancelBtnText: "取消",
+         pickerTitleText: "选择城市",
+         onPickerConfirm: data => {
+           // data =  [广东，广州，天河]
+           this.setState(
+             {
+               city: data[1]
+             }
+           );
+         }
+       });
+       Picker.show();
+   ```
+
+
+## [react-native-image-crop-picker图片裁切组件](https://www.npmjs.com/package/react-native-image-crop-picker)
+
+> 图片裁切组件
+
+1. 安装
+
+   ```
+   yarn add  react-native-image-crop-picker 
+   ```
+
+2. 使用
+
+   ```react
+   import ImagePicker from 'react-native-image-crop-picker';
+   
+       ImagePicker.openPicker({
+         width: 300,
+         height: 400,
+         cropping: true
+       }).then(image => {
+         console.log(image);
+       });
+   ```
+
+---
 
 ## react-native-webview
 
